@@ -53,7 +53,6 @@
                             <th>ID</th>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Password (Hashed)</th>
                             <th>Role</th>
                             <th>Actions</th>
                         </tr>
@@ -64,7 +63,6 @@
                             <td>{{ $user->id }}</td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
-                            <td>{{ substr($user->password, 0, 20) }}...</td> <!-- Display truncated hashed password -->
                             <td>
                                 <span class="badge {{ $user->role === 'admin' ? 'badge-success' : 'badge-primary' }}">
                                     {{ $user->role }}

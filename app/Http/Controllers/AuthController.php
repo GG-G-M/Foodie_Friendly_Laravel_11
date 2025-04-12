@@ -26,20 +26,16 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required'
         ]);
-
+    
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-
-            if (Auth::user()->role === 'admin') {
-                return redirect()->intended(route('admin.dashboard'));
-            }
-
-            return redirect()->intended(route('home'));
+            
+            return Auth::user()->role === 'admin' 
+                ? redirect()->route('admin.dashboard')
+                : redirect()->route('home');
         }
-
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+    
+        return back()->withErrors(['email' => 'Invalid credentials'])->onlyInput('email');
     }
     /**
      * Show registration page
@@ -83,9 +79,13 @@ class AuthController extends Controller
     /**
      * Handle logout
      */
-    public function logout()
+    public function logout(Request $request)
     {
         Auth::logout();
+        
+        $request->session()->invalidate();  // Invalidates the session
+        $request->session()->regenerateToken();  // Regenerates CSRF token
+        
         return redirect()->route('login');
     }
 }
