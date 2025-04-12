@@ -54,20 +54,33 @@ class AdminController extends Controller
     {
         try {
             $query = User::query();
-    
+            
             // Search functionality
             if ($request->has('search')) {
                 $searchTerm = $request->input('search');
-                $query->where('name', 'LIKE', "%{$searchTerm}%")
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('name', 'LIKE', "%{$searchTerm}%")
                       ->orWhere('email', 'LIKE', "%{$searchTerm}%")
                       ->orWhere('role', 'LIKE', "%{$searchTerm}%");
+                });
             }
     
-            $users = $query->paginate(10);
-            $totalUsers = User::count();
-            $totalOrders = 5; // Dummy value (replace later)
+            // Role filter
+            if ($request->has('role_filter') && in_array($request->role_filter, ['admin', 'customer'])) {
+                $query->where('role', $request->role_filter);
+            }
     
-            return view('admin.user_management', compact('users', 'totalUsers', 'totalOrders'));
+            $users = $query->orderBy('created_at', 'desc')->paginate(10);
+            $totalUsers = User::count();
+            $totalCustomers = User::where('role', 'customer')->count();
+            $totalAdmins = User::where('role', 'admin')->count();
+    
+            return view('admin.user_management', compact(
+                'users', 
+                'totalUsers',
+                'totalCustomers',
+                'totalAdmins'
+            ));
         } catch (\Exception $e) {
             error_log('Error fetching users: ' . $e->getMessage());
             return redirect()->back()->with('error', 'An error occurred while fetching users.');

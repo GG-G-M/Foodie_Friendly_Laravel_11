@@ -2,22 +2,24 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">User Management</h1>
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show">
-                {{ session('success') }}
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
+<!-- Page Heading -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">User Management</h1>
+    
+    <div class="d-flex align-items-center">
+        <!-- Role Filter Dropdown -->
+        <form action="{{ route('admin.user_management') }}" method="GET" class="mr-3">
+            <div class="input-group">
+                <select name="role_filter" class="form-control" style="min-width: 150px;" onchange="this.form.submit()">
+                    <option value="">All Roles</option>
+                    <option value="admin" {{ request('role_filter') == 'admin' ? 'selected' : '' }}>Admins</option>
+                    <option value="customer" {{ request('role_filter') == 'customer' ? 'selected' : '' }}>Customers</option>
+                </select>
             </div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show">
-                {{ session('error') }}
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-            </div>
-        @endif
-        <form action="{{ route('admin.user_management') }}" method="GET" class="w-25">
+        </form>
+        
+        <!-- Search Form -->
+        <form action="{{ route('admin.user_management') }}" method="GET" class="d-flex">
             <div class="input-group">
                 <input 
                     type="text" 
@@ -25,6 +27,7 @@
                     class="form-control search-bar" 
                     placeholder="Search users..." 
                     value="{{ request('search') }}"
+                    style="min-width: 200px;"
                 >
                 <div class="input-group-append">
                     <button type="submit" class="btn btn-primary">
@@ -34,6 +37,52 @@
             </div>
         </form>
     </div>
+</div>
+
+
+<!-- Role Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Users</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalUsers }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Admins</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalAdmins }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Customers</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalCustomers }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     
     
 
@@ -88,45 +137,12 @@
                 </table>
             </div>
 
+            <!-- Pagination Links with Filter Preservation -->
             <div class="d-flex justify-content-center mt-4">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination">
-                        {{-- Previous Page Link --}}
-                        @if ($users->onFirstPage())
-                            <li class="page-item disabled">
-                                <span class="page-link">&laquo;</span>
-                            </li>
-                        @else
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $users->previousPageUrl() }}" rel="prev">&laquo;</a>
-                            </li>
-                        @endif
-            
-                        {{-- Pagination Elements --}}
-                        @foreach ($users->getUrlRange(1, $users->lastPage()) as $page => $url)
-                            @if ($page == $users->currentPage())
-                                <li class="page-item active" aria-current="page">
-                                    <span class="page-link">{{ $page }}</span>
-                                </li>
-                            @else
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ $url }}">{{ $page }}</a>
-                                </li>
-                            @endif
-                        @endforeach
-            
-                        {{-- Next Page Link --}}
-                        @if ($users->hasMorePages())
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $users->nextPageUrl() }}" rel="next">&raquo;</a>
-                            </li>
-                        @else
-                            <li class="page-item disabled">
-                                <span class="page-link">&raquo;</span>
-                            </li>
-                        @endif
-                    </ul>
-                </nav>
+                {{ $users->appends([
+                    'search' => request('search'),
+                    'role_filter' => request('role_filter')
+                ])->links('pagination::bootstrap-4') }}
             </div>
         </div>
     </div>
@@ -151,6 +167,7 @@
 
 @section('styles')
 <style>
+    
     /* Custom styles for the table */
     #userTable {
         border-radius: 10px;
