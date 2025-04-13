@@ -36,7 +36,7 @@ Route::middleware(['auth', CheckRole::class.':customer'])->group(function () {
     Route::get('/search', [ProductController::class, 'search'])->name('search');
     
     // Cart routes
-    Route::get('/car5t', function () {
+    Route::get('/cart', function () {
         return view('cart');
     })->name('cart');
 

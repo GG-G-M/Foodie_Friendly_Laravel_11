@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +13,33 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Uncomment below if you want to generate random users
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            ['name' => 'Test User']
+        );
+        
+        User::firstOrCreate(
+            ['email' => 'customer@gmail.com'],
+            [
+                'name' => 'Customer',
+                'password' => Hash::make('123'),
+                'role' => 'customer',
+            ]
+        );
+        
+        User::firstOrCreate(
+            ['email' => 'gilgregenemantilla@gmail.com'],
+            [
+                'name' => 'Gilgre',
+                'password' => Hash::make('123'),
+                'role' => 'admin',
+            ]
+        );
+        
+
+        $this->command->info('Default database seeded successfully!');
     }
 }
