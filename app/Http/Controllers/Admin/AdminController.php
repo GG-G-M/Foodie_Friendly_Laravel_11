@@ -19,20 +19,21 @@ class AdminController extends Controller
     {
         try {
             $totalUsers = User::count();
+            $totalAdmins = User::where('role', 'admin')->count();  // Added this line
+            $totalCustomers = User::where('role', 'customer')->count();  // Added this line
+            
             // $totalOrders = Order::count();
             // $totalRevenue = Order::sum('total_price');
             // $recentOrders = Order::latest()->take(5)->get();
-
+    
             $totalOrders = 2.355;
             $totalRevenue = 5.2222;
             $recentOrders = 5.22222;
-
-
-            // return view(
-            //     'about'
-            // );
+    
             return view('admin.dashboard', compact(
                 'totalUsers',
+                'totalAdmins',       // Added this
+                'totalCustomers',    // Added this
                 'totalOrders',
                 'totalRevenue',
                 'recentOrders'
@@ -177,16 +178,7 @@ public function update(Request $request, User $user)
      */
     public function OrderCategories()
     {
-        // Dummy data for the food items
-        $foods = [
-            (object) ['id' => 1, 'name' => 'Burger', 'category' => 'Fast Food', 'price' => 5.99],
-            (object) ['id' => 2, 'name' => 'Pizza', 'category' => 'Italian', 'price' => 9.99],
-            (object) ['id' => 3, 'name' => 'Pasta', 'category' => 'Italian', 'price' => 7.49],
-            (object) ['id' => 4, 'name' => 'Salad', 'category' => 'Vegetarian', 'price' => 4.99],
-            (object) ['id' => 5, 'name' => 'chicken', 'category' => 'Fast food', 'price' => 5.99],
-            
-        ];
-    
+        $foods = Food::orderBy('created_at', 'desc')->paginate(10);
         return view('admin.order_categories', compact('foods'));
     }
     

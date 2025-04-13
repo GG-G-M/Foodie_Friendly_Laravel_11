@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\ProductController;
 use App\Http\Middleware\CheckRole;
 
@@ -55,9 +56,17 @@ Route::middleware(['auth', CheckRole::class.':admin'])->group(function () {
         Route::put('/users/{user}', [AdminController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('users.destroy');
 
-    Route::get('/order_categories', [AdminController::class, 'OrderCategories'])->name('admin.order_categories');
-    Route::post('/order_menu/store', [AdminController::class, 'storeFood'])->name('admin.food.store');
+   // Food Routes
+   Route::get('/order-categories', [FoodController::class, 'index'])->name('admin.order_categories');
+   Route::post('/foods', [FoodController::class, 'store'])->name('foods.store');
+   Route::put('/foods/{food}', [FoodController::class, 'update'])->name('foods.update');
+   Route::delete('/foods/{food}', [FoodController::class, 'destroy'])->name('foods.destroy');
+    
+    // Order Menu Routes
     Route::get('/order-menu', [AdminController::class, 'orderMenu'])->name('admin.order_menu');
+    Route::post('/order_menu/store', [AdminController::class, 'storeFood'])->name('admin.food.store');
+    
+    // Analytics
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
 });
 
