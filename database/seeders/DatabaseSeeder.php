@@ -13,33 +13,40 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Uncomment below if you want to generate random users
-        // User::factory(10)->create();
+        // Create default users
+        // User::firstOrCreate(
+        //     ['email' => 'customer@gmail.com'],
+        //     [
+        //         'name' => 'Customer',
+        //         'password' => Hash::make('123'),
+        //         'role' => 'customer',
+        //     ]
+        // );
+        
+        // User::firstOrCreate(
+        //     ['email' => 'gilgregenemantilla@gmail.com'],
+        //     [
+        //         'name' => 'Gilgre',
+        //         'password' => Hash::make('123'),
+        //         'role' => 'admin',
+        //     ]
+        // );
+        
+        // Seed Admin
+        $this->call([
+            AdminUserSeeder::class
+        ]);
+        
+        // Seed User
+        $this->call([
+            UsersTableSeeder::class
+        ]);
 
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            ['name' => 'Test User']
-        );
-        
-        User::firstOrCreate(
-            ['email' => 'customer@gmail.com'],
-            [
-                'name' => 'Customer',
-                'password' => Hash::make('123'),
-                'role' => 'customer',
-            ]
-        );
-        
-        User::firstOrCreate(
-            ['email' => 'gilgregenemantilla@gmail.com'],
-            [
-                'name' => 'Gilgre',
-                'password' => Hash::make('123'),
-                'role' => 'admin',
-            ]
-        );
-        
-
+        // Seed sample food items
+        $this->call([
+            FoodSeeder::class
+        ]);
+    
         $this->command->info('Default database seeded successfully!');
     }
 }

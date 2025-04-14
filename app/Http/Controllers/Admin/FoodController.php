@@ -37,16 +37,21 @@ class FoodController extends Controller
     /**
      * Update an existing food item
      */
+    public function edit(Food $food)
+    {
+        return view('admin.foods.edit', compact('food'));
+    }
+    
     public function update(Request $request, Food $food)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0'
+            'price' => 'required|numeric|min:0.01'
         ]);
-
+    
         $food->update($validated);
-
+    
         return redirect()->route('admin.order_categories')
             ->with('success', 'Food item updated successfully!');
     }

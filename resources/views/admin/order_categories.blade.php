@@ -1,5 +1,9 @@
 @extends('layouts.welcome_admin')
-
+@if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
 @section('content')
 <div class="container py-4">
     <h2 class="mb-4">🍽️ Order Categories - Admin Panel</h2>
@@ -60,13 +64,7 @@
                             <td>{{ $food->category }}</td>
                             <td>${{ number_format($food->price, 2) }}</td>
                             <td>
-                                <button class="btn btn-sm btn-warning edit-food-btn"
-                                        data-id="{{ $food->id }}"
-                                        data-name="{{ $food->name }}"
-                                        data-category="{{ $food->category }}"
-                                        data-price="{{ $food->price }}">
-                                    Edit
-                                </button>
+                                <a href="{{ route('foods.edit', $food->id) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <form action="{{ route('foods.destroy', $food->id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
@@ -89,62 +87,4 @@
     </div>
 </div>
 
-<!-- Edit Food Modal -->
-<div class="modal fade" id="editFoodModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="editFoodForm" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Food Item</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="edit_food_name" class="form-label">Food Name</label>
-                        <input type="text" class="form-control" id="edit_food_name" name="name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_food_category" class="form-label">Category</label>
-                        <input type="text" class="form-control" id="edit_food_category" name="category" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_food_price" class="form-label">Price</label>
-                        <input type="number" class="form-control" id="edit_food_price" name="price" step="0.01" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@section('scripts')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        // Edit Food Modal
-        $('.edit-food-btn').click(function() {
-            const foodId = $(this).data('id');
-            const foodName = $(this).data('name');
-            const foodCategory = $(this).data('category');
-            const foodPrice = $(this).data('price');
-            
-            $('#edit_food_name').val(foodName);
-            $('#edit_food_category').val(foodCategory);
-            $('#edit_food_price').val(foodPrice);
-            
-            // Set form action
-            $('#editFoodForm').attr('action', '/foods/' + foodId);
-            
-            // Show modal
-            $('#editFoodModal').modal('show');
-        });
-    });
-</script>
-@endsection
 @endsection

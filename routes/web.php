@@ -57,10 +57,11 @@ Route::middleware(['auth', CheckRole::class.':admin'])->group(function () {
         Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('users.destroy');
 
    // Food Routes
-   Route::get('/order-categories', [FoodController::class, 'index'])->name('admin.order_categories');
-   Route::post('/foods', [FoodController::class, 'store'])->name('foods.store');
-   Route::put('/foods/{food}', [FoodController::class, 'update'])->name('foods.update');
-   Route::delete('/foods/{food}', [FoodController::class, 'destroy'])->name('foods.destroy');
+    Route::get('/order-categories', [FoodController::class, 'index'])->name('admin.order_categories');
+    Route::post('/foods', [FoodController::class, 'store'])->name('foods.store'); //Crewate
+    Route::get('/foods/{food}/edit', [FoodController::class, 'edit'])->name('foods.edit'); //Edit
+    Route::put('/foods/{food}', [FoodController::class, 'update'])->name('foods.update');
+    Route::delete('/foods/{food}', [FoodController::class, 'destroy'])->name('foods.destroy'); //Delete
     
     // Order Menu Routes
     Route::get('/order-menu', [AdminController::class, 'orderMenu'])->name('admin.order_menu');
