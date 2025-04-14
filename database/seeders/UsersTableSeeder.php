@@ -119,5 +119,7 @@ class UsersTableSeeder extends Seeder
                 ]
             );
         }
+
+        $this->command->info('Sample food items seeded successfully!');
     }
 }
