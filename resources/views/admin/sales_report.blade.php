@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container py-4">
-    <h2 class="mb-4 text-brown">📊 Admin Analytics</h2>
+    <h2 class="mb-4 text-brown">📊 Sales Report</h2>
 
     <div class="row mb-4">
         <div class="col-md-4">

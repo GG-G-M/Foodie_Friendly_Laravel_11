@@ -5,7 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\SalesController;
 use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\ProductController;
 use App\Http\Middleware\CheckRole;
@@ -68,7 +68,7 @@ Route::middleware(['auth', CheckRole::class.':admin'])->group(function () {
     Route::post('/order_menu/store', [AdminController::class, 'storeFood'])->name('admin.food.store');
     
     // Analytics
-    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+    Route::get('/sales_report', [SalesController::class, 'index'])->name('sales_report');
 });
 
 // Publicly accessible about page

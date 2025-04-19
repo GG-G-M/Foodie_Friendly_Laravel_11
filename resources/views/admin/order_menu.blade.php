@@ -1,21 +1,92 @@
 @extends('layouts.welcome_admin')
 
 @section('content')
+
+<!-- Bootstrap Icons CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
 <style>
-    .text-brown { color: #6b4226; }
-    .badge-pending { background-color: #ffc107; }
-    .badge-completed { background-color: #28a745; }
-    .badge-cancelled { background-color: #dc3545; }
+    body {
+        background-color: #f7f3ef;
+    }
+
+    .text-brown {
+        color: #5e3b27;
+    }
+
+    .card {
+        border: 1px solid #cbb09c;
+        background-color: #fffdf9;
+        border-radius: 12px;
+    }
+
+    .card-header {
+        background-color: #e4c9a4;
+        color: #3e2a1c;
+    }
+
+    .table thead {
+        background-color: #f0e6dd;
+    }
+
+    .badge-pending {
+        background-color: #ffc107;
+        color: #fff;
+    }
+
+    .badge-completed {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    .badge-cancelled {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .btn-primary {
+        background-color: #8b5e3c;
+        border-color: #8b5e3c;
+    }
+
+    .btn-primary:hover {
+        background-color: #71452d;
+        border-color: #71452d;
+    }
+
+    .btn-danger {
+        background-color: #c0392b;
+        border-color: #c0392b;
+    }
+
+    .btn-danger:hover {
+        background-color: #a93226;
+        border-color: #a93226;
+    }
+
+    .btn i {
+        margin-right: 4px;
+    }
+
+    .table td,
+    .table th {
+        vertical-align: middle;
+    }
+
+    h2 {
+        font-weight: bold;
+        text-shadow: 1px 1px 0 #e9d8c5;
+    }
 </style>
 
 <div class="container py-4">
-    <h2 class="mb-4 text-brown">🛒 Order Management</h2>
+    <h2 class="mb-4 text-center text-brown">🛒 Order Management</h2>
 
     <div class="card shadow-sm">
-        <div class="card-header bg-white fw-bold text-brown">Order List</div>
+        <div class="card-header fw-bold text-brown">📋 Order List</div>
         <div class="card-body">
             <table class="table table-bordered table-hover">
-                <thead class="table-light">
+                <thead>
                     <tr>
                         <th>#</th>
                         <th>Customer</th>
@@ -53,8 +124,12 @@
                             </td>
                             <td>{{ $order['time'] }}</td>
                             <td>
-                                <a href="#" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i> View</a>
-                                <a href="#" class="btn btn-sm btn-danger"><i class="fas fa-trash-alt"></i> Cancel</a>
+                                <a href="#" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a href="#" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
                             </td>
                         </tr>
                     @endforeach
@@ -63,4 +138,5 @@
         </div>
     </div>
 </div>
+
 @endsection

@@ -121,8 +121,8 @@
                 <i>📋</i> Order Menu
             </a>
 
-            <a class="nav-link {{ request()->routeIs('analytics') ? 'active' : '' }}" href="{{ route('analytics') }}">
-    <i>📊</i> Analytics
+            <a class="nav-link {{ request()->routeIs('sales_report') ? 'active' : '' }}" href="{{ route('sales_report') }}">
+    <i>📊</i> Sales Report
 </a>
 
 
