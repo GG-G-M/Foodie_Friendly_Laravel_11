@@ -64,11 +64,14 @@ Route::middleware(['auth', CheckRole::class.':admin'])->group(function () {
     Route::delete('/foods/{food}', [FoodController::class, 'destroy'])->name('foods.destroy'); //Delete
     
     // Order Menu Routes
-    Route::get('/order-menu', [AdminController::class, 'orderMenu'])->name('admin.order_menu');
+    Route::get('/order_menu', [AdminController::class, 'orderMenu'])->name('admin.order_menu');
     Route::post('/order_menu/store', [AdminController::class, 'storeFood'])->name('admin.food.store');
     
-    // Analytics
-    Route::get('/sales_report', [SalesController::class, 'index'])->name('sales_report');
+    // Sales Report
+    Route::get('/sales_report', [SalesController::class, 'index'])->name('admin.sales_report');
+    Route::post('/sales_report/filter', [SalesController::class, 'filter'])->name('admin.sales_report.filter');
+
+
 });
 
 // Publicly accessible about page
