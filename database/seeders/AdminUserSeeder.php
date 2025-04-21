@@ -29,6 +29,15 @@ class AdminUserSeeder extends Seeder
             ]
         );
 
+        User::firstOrCreate(
+            ['email' => 'latog@gmail.com'],
+            [
+                'name' => 'Administrator',
+                'password' => Hash::make('123'), // Change this to a secure password
+                'role' => 'admin'
+            ]
+        );
+
         $this->command->info('Admin user created successfully!');
     }
 }

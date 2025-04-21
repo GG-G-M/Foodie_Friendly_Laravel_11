@@ -1,15 +1,22 @@
 <?php
-
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'total_price',
-        'status'
+        'status',
+        'items' // We'll store order items as JSON
+    ];
+
+    protected $casts = [
+        'items' => 'array'
     ];
 
     public function user()
@@ -17,8 +24,8 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function foods()
-    {
-        return $this->belongsToMany(Food::class)->withPivot('quantity', 'price');
-    }
+    // Status constants
+    const STATUS_PENDING = 'pending';
+    const STATUS_COMPLETED = 'completed';
+    const STATUS_CANCELLED = 'cancelled';
 }
