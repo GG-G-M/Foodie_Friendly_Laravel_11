@@ -52,41 +52,46 @@ class AdminController extends Controller
      * @return \Illuminate\View\View
      */
     public function userManagement(Request $request)
-    {
-        try {
-            $query = User::query();
-            
-            // Search functionality
-            if ($request->has('search')) {
-                $searchTerm = $request->input('search');
-                $query->where(function($q) use ($searchTerm) {
-                    $q->where('name', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('email', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('role', 'LIKE', "%{$searchTerm}%");
-                });
-            }
-    
-            // Role filter
-            if ($request->has('role_filter') && in_array($request->role_filter, ['admin', 'customer'])) {
-                $query->where('role', $request->role_filter);
-            }
-    
-            $users = $query->orderBy('created_at', 'desc')->paginate(10);
-            $totalUsers = User::count();
-            $totalCustomers = User::where('role', 'customer')->count();
-            $totalAdmins = User::where('role', 'admin')->count();
-    
-            return view('admin.user_management', compact(
-                'users', 
-                'totalUsers',
-                'totalCustomers',
-                'totalAdmins'
-            ));
-        } catch (\Exception $e) {
-            error_log('Error fetching users: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'An error occurred while fetching users.');
+{
+    try {
+        $query = User::query();
+        
+        // Search functionality
+        if ($request->has('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('email', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('role', 'LIKE', "%{$searchTerm}%");
+            });
         }
+
+        // Role filter
+        if ($request->has('role_filter') && in_array($request->role_filter, ['admin', 'customer'])) {
+            $query->where('role', $request->role_filter);
+        }
+        
+        // Sorting functionality (by ID)
+        $sortOrder = $request->input('sort_order', 'desc'); // Default to 'desc' if no sort order is provided
+        $query->orderBy('id', $sortOrder); // Sort by ID
+
+        $users = $query->paginate(10);
+        $totalUsers = User::count();
+        $totalCustomers = User::where('role', 'customer')->count();
+        $totalAdmins = User::where('role', 'admin')->count();
+
+        return view('admin.user_management', compact(
+            'users', 
+            'totalUsers',
+            'totalCustomers',
+            'totalAdmins'
+        ));
+    } catch (\Exception $e) {
+        error_log('Error fetching users: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'An error occurred while fetching users.');
     }
+}
+
 //CREATE BUTTON [3]
 // Show the create form
 public function create()

@@ -5,8 +5,8 @@
 <!-- Bootstrap Icons CDN -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
-<div class="container py-4">
-    <h2 class="mb-4 text-center text-brown">🛒 Order Management</h2>
+<div class="container py-4" style="background-color: #f4ece3; border-radius: 15px;">
+    <h2 class="mb-4 text-center" style="color: #5D3A00;">🛒 Order Management</h2>
 
     @if(session('success'))
         <div class="alert alert-success">
@@ -14,14 +14,16 @@
         </div>
     @endif
 
-    <div class="card shadow-sm">
-        <div class="card-header fw-bold text-brown">📋 Order List</div>
+    <div class="card shadow-sm" style="background-color: #fff7f0;">
+        <div class="card-header fw-bold" style="background-color: #d2b48c; color: #3e2600;">
+            📋 Order List
+        </div>
         <div class="card-body">
-            <a href="{{ route('admin.orders.create') }}" class="btn btn-success">
+            <a href="{{ route('admin.orders.create') }}" class="btn btn-success mb-3">
                 <i class="bi bi-plus-circle"></i> Create Order
             </a>
-            <table class="table table-bordered table-hover">
-                <thead>
+            <table class="table table-bordered table-hover table-light">
+                <thead class="table-dark" style="background-color: #a97c50; color: white;">
                     <tr>
                         <th>#</th>
                         <th>Customer</th>
@@ -77,17 +79,29 @@
 </div>
 
 <style>
-    /* Your existing styles remain the same */
-    .badge-success {
-        background-color: #28a745;
+    .badge-pending {
+        background-color: #d2b48c; 
+        color: #3e2600;
+    }
+
+    .badge-completed {
+        background-color: #28a745; 
         color: #fff;
     }
-    
+
+    .badge-cancelled {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
     form {
         display: inline-block;
         margin-right: 5px;
     }
-    
+
+    body {
+        background-color: #eaddcf;
+    }
 </style>
 
 @endsection

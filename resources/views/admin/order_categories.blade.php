@@ -78,35 +78,43 @@
 <div class="container py-4">
     <h2 class="mb-4 text-center text-brown">🍽️ Order Categories - Admin Panel</h2>
 
-    <!-- Add Food Item -->
-    <div class="card mb-4">
-        <div class="card-header">➕ Add Food Item</div>
-        <div class="card-body">
-            <form action="{{ route('foods.store') }}" method="POST">
-                @csrf
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="name" class="form-label">Food Name</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
-                        @error('name') <span class="text-danger">{{ $message }}</span> @enderror
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="category" class="form-label">Category</label>
-                        <input type="text" class="form-control" id="category" name="category" required>
-                        @error('category') <span class="text-danger">{{ $message }}</span> @enderror
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="price" class="form-label">Price</label>
-                        <input type="number" class="form-control" id="price" name="price" step="0.01" required>
-                        @error('price') <span class="text-danger">{{ $message }}</span> @enderror
-                    </div>
+  <!-- Add Food Item -->
+<div class="card mb-4">
+    <div class="card-header">➕ Add Food Item</div>
+    <div class="card-body">
+        <form action="{{ route('foods.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="name" class="form-label">Food Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                    @error('name') <span class="text-danger">{{ $message }}</span> @enderror
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Add Food
-                </button>
-            </form>
-        </div>
+                <div class="col-md-4 mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <input type="text" class="form-control" id="category" name="category" required>
+                    @error('category') <span class="text-danger">{{ $message }}</span> @enderror
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="price" class="form-label">Price</label>
+                    <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+                    @error('price') <span class="text-danger">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <!-- Image Upload Field -->
+            <div class="col-md-4 mb-3">
+                <label for="image" class="form-label">Food Image</label>
+                <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                @error('image') <span class="text-danger">{{ $message }}</span> @enderror
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add Food
+            </button>
+        </form>
     </div>
+</div>
 
     <!-- Food List -->
     <div class="card">
