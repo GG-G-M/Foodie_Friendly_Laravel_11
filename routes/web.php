@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SalesController;
 use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\DeliveryController;
 use App\Http\Middleware\CheckRole;
 
 // Redirect root ('/') to login page
@@ -56,6 +57,13 @@ Route::middleware(['auth', CheckRole::class.':admin'])->group(function () {
         Route::put('/users/{user}', [AdminController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('users.destroy');
 
+    // Rider Users
+
+    Route::get('/admin/rider-users', [AdminController::class, 'riderUsers'])->name('admin.rider_users');
+
+
+
+
    // Food Routes
     Route::get('/order-categories', [FoodController::class, 'index'])->name('admin.order_categories');
     Route::post('/foods', [FoodController::class, 'store'])->name('foods.store'); //Crewate
@@ -74,6 +82,16 @@ Route::middleware(['auth', CheckRole::class.':admin'])->group(function () {
     // Sales Report
     Route::get('/sales_report', [SalesController::class, 'index'])->name('admin.sales_report');
     Route::post('/sales_report/filter', [SalesController::class, 'filter'])->name('admin.sales_report.filter');
+
+
+
+    
+    Route::middleware('auth')->group(function () {
+        // Route for Deliveries page
+        Route::get('/rider/deliveries', [DeliveryController::class, 'index'])->name('rider.deliveries');
+    });
+    
+    
 
 
 });

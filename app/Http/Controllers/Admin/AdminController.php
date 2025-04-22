@@ -172,6 +172,24 @@ public function update(Request $request, User $user)
         return redirect()->back()->with('error', 'Failed to delete user.');
     }
 }
+
+//Rider user controller
+
+public function riderUsers()
+{
+    $riders = User::where('role', 'rider')->get(); // Adjust if you use a separate Rider model
+    return view('admin.rider_user', compact('riders'));
+}
+
+
+
+
+
+
+
+
+
+
 //-------------------------------------USER MANAGEMENTSECTION---------------------------------------
 
 
