@@ -122,15 +122,5 @@ class UsersTableSeeder extends Seeder
 
         $this->command->info('Sample food items seeded successfully!');
 
-        User::create([
-            'name' => 'Rider Dummy',
-            'email' => 'rider@example.com',
-            'password' => bcrypt('password123'),
-            'role' => 'rider', // Make sure your system uses this role
-            'phone' => '09123456789', // Optional, if your table has it
-        ]);
-
-
-
     }
 }

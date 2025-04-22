@@ -8,7 +8,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SalesController;
 use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\Admin\RiderController;
 use App\Http\Middleware\CheckRole;
 
 // Redirect root ('/') to login page
@@ -32,7 +32,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Customer Routes
-Route::middleware(['auth', CheckRole::class.':customer'])->group(function () {
+Route::middleware(['auth', CheckRole::class . ':customer'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('/search', [FoodController::class, 'search'])->name('search');
 
@@ -48,28 +48,33 @@ Route::middleware(['auth', CheckRole::class.':customer'])->group(function () {
 });
 
 // Admin Routes
-Route::middleware(['auth', CheckRole::class.':admin'])->group(function () {
+Route::middleware(['auth', CheckRole::class . ':admin'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    
+    // User Management Routes
     Route::get('/user_management', [AdminController::class, 'userManagement'])->name('admin.user_management');
-        Route::get('/users/create', [AdminController::class, 'create'])->name('users.create');
-        Route::post('/users', [AdminController::class, 'store'])->name('users.store');
-        Route::get('/users/{user}/edit', [AdminController::class, 'edit'])->name('users.edit');
-        Route::put('/users/{user}', [AdminController::class, 'update'])->name('users.update');
-        Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('users.destroy');
+    Route::get('/users/create', [AdminController::class, 'create'])->name('users.create');
+    Route::post('/users', [AdminController::class, 'store'])->name('users.store');
+    Route::get('/users/{user}/edit', [AdminController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [AdminController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('users.destroy');
 
-    // Rider Users
+    // Rider Routes
+    Route::prefix('riders')->group(function () {
+        Route::get('/', [RiderController::class, 'index'])->name('admin.riders.index');
+        Route::get('/create', [RiderController::class, 'create'])->name('admin.riders.create');
+        Route::post('/', [RiderController::class, 'store'])->name('admin.riders.store');
+        Route::get('/{rider}/edit', [RiderController::class, 'edit'])->name('admin.riders.edit');
+        Route::put('/{rider}', [RiderController::class, 'update'])->name('admin.riders.update');
+        Route::delete('/{rider}', [RiderController::class, 'destroy'])->name('admin.riders.destroy');
+    });
 
-    Route::get('/admin/rider-users', [AdminController::class, 'riderUsers'])->name('admin.rider_users');
-
-
-
-
-   // Food Routes
+    // Food Routes
     Route::get('/order-categories', [FoodController::class, 'index'])->name('admin.order_categories');
-    Route::post('/foods', [FoodController::class, 'store'])->name('foods.store'); //Crewate
-    Route::get('/foods/{food}/edit', [FoodController::class, 'edit'])->name('foods.edit'); //Edit
+    Route::post('/foods', [FoodController::class, 'store'])->name('foods.store');
+    Route::get('/foods/{food}/edit', [FoodController::class, 'edit'])->name('foods.edit');
     Route::put('/foods/{food}', [FoodController::class, 'update'])->name('foods.update');
-    Route::delete('/foods/{food}', [FoodController::class, 'destroy'])->name('foods.destroy'); //Delete
+    Route::delete('/foods/{food}', [FoodController::class, 'destroy'])->name('foods.destroy');
     
     // Order Menu Routes
     Route::get('/order-menu', [OrderController::class, 'index'])->name('admin.order_menu');
@@ -79,26 +84,12 @@ Route::middleware(['auth', CheckRole::class.':admin'])->group(function () {
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('admin.orders.cancel');
     Route::post('/orders/{order}/complete', [OrderController::class, 'complete'])->name('admin.orders.complete');
     
-    // Sales Report
+    // Sales Report Routes
     Route::get('/sales_report', [SalesController::class, 'index'])->name('admin.sales_report');
     Route::post('/sales_report/filter', [SalesController::class, 'filter'])->name('admin.sales_report.filter');
-
-
-
-    
-    Route::middleware('auth')->group(function () {
-        // Route for Deliveries page
-        Route::get('/rider/deliveries', [DeliveryController::class, 'index'])->name('rider.deliveries');
-    });
-    
-    
-
-
 });
 
 // Publicly accessible about page
 Route::get('/about', function () {
     return view('about');
 })->name('about');
-
-    

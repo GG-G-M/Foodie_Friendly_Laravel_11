@@ -20,7 +20,7 @@
             <i class="fas fa-users"></i> User Management
             
     
-        <a class="nav-link {{ request()->routeIs('admin.rider_users') ? 'active' : '' }}" href="{{ route('admin.rider_users') }}">
+        <a class="nav-link {{ request()->routeIs('admin.riders.index') ? 'active' : '' }}" href="{{ route('admin.riders.index') }}">
     <i class="fas fa-motorcycle"></i> Rider Users
 </a>
 
