@@ -19,12 +19,11 @@
         <a class="nav-link {{ request()->routeIs('admin.user_management') ? 'active' : '' }}" href="{{ route('admin.user_management') }}">
             <i class="fas fa-users"></i> User Management
             
-            
-            <a class="nav-link {{ request()->routeIs('admin.rider_users') ? 'active' : '' }}" href="{{ route('admin.rider_users') }}">
+    
+        <a class="nav-link {{ request()->routeIs('admin.rider_users') ? 'active' : '' }}" href="{{ route('admin.rider_users') }}">
     <i class="fas fa-motorcycle"></i> Rider Users
 </a>
 
-       
         </a>
         <a class="nav-link {{ request()->routeIs('admin.order_categories') ? 'active' : '' }}" href="{{ route('admin.order_categories') }}">
             <i class="fas fa-shopping-cart"></i> Order Categories
