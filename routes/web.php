@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Customer\HomeController;
+use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SalesController;
 use App\Http\Controllers\Admin\FoodController;
@@ -38,12 +38,12 @@ Route::middleware(['auth', CheckRole::class . ':customer'])->group(function () {
 
     // Cart routes
     Route::get('/cart', function () {
-        return view('cart');
+        return view('customer.cart');
     })->name('cart');
 
     // Order tracker route
     Route::get('/tracker', function () {
-        return view('view_tracker');
+        return view('customer.view_tracker');
     })->name('tracker');
 });
 
