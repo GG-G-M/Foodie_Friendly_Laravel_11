@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,14 +9,16 @@ class Food extends Model
     use HasFactory;
 
     protected $table = 'foods';
-    protected $fillable = [
-        'name',
-        'category',
-        'price'
-    ];
 
-    public function orders()
+    protected $fillable = ['name', 'description', 'price', 'image'];
+
+    public function carts()
     {
-        return $this->belongsToMany(Order::class)->withPivot('quantity', 'price');
+        return $this->hasMany(Cart::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }

@@ -38,7 +38,7 @@
                         <tr>
                             <td>{{ $order->id }}</td>
                             <td>{{ $order->user->name }}</td>
-                            <td>${{ number_format($order->total_price, 2) }}</td>
+                            <td>₱{{ number_format($order->total_amount, 2) }}</td> <!-- Changed from total_price to total_amount -->
                             <td>
                                 <span class="badge 
                                     @if($order->status === 'pending') badge-pending

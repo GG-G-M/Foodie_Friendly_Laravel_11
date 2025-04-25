@@ -1,157 +1,92 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Customer Page</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-        <style>
-            /* Gradient Background */
-            body {
-                background: linear-gradient(to bottom, #D2B48C, #A67B5B);
-                min-height: 100vh;
-                color: #5A3E36;
-                padding-left: 220px; /* Matches sidebar width */
-                transition: padding-left 0.3s ease;
-            }
-            /* Brand Title Styling */
-            .brand-title {  
-                text-align: center;
-                font-size: 25px;
-                font-weight: bold;
-                color: white;
-                padding: 10px 0;
-                margin-bottom: 10px;
-                font-family: 'Arial', sans-serif;
-            }
-
-            /* Sidebar Navigation */
-            .side-nav {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 220px;
-                height: 100%;
-                background: linear-gradient(to bottom, #8B4513, #A67B5B, #D2B48C);
-                display: flex;
-                flex-direction: column;
-                padding-top: 20px;
-                padding-left: 15px;
-                box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.5);
-                z-index: 1000;
-            }
-
-            /* Main Content Adjustment */
-            .main-content {
-                padding: 20px;
-                transition: margin-left 0.3s ease;
-            }
-
-            /* Navigation Links */
-            .nav-items {
-                width: 100%;
-            }
-
-            .nav-item {
-                display: flex;
-                align-items: center;
-                padding: 10px;
-                color: #FAEBD7;
-                text-decoration: none;
-                font-size: 16px;
-                transition: 0.3s;
-            }
-
-            .nav-item i {
-                margin-right: 8px;
-                font-size: 18px;
-            }
-
-            .nav-item:hover, .tracker-btn:hover, .logout-btn:hover {
-                background-color: #5A3E36;
-                color: white;
-                border-radius: 5px;
-            }
-
-            /* Tracker Button */
-            .tracker-btn {
-                display: flex;
-                align-items: center;
-                padding: 10px;
-                color: #FAEBD7;
-                text-decoration: none;
-                font-size: 16px;
-                transition: 0.3s;
-            }
-
-            /* Logout Button */
-            .logout-btn {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 90%;
-                padding: 10px;
-                margin-top: auto;
-                background:rgb(216, 127, 11);
-                color: #5A3E36;
-                font-weight: bold;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                transition: 0.3s;
-            }
-
-            .logout-btn i {
-                margin-right: 8px;
-            }
-
-            .logout-btn:hover {
-                background: #5A3E36;
-                color: white;
-            }
-        </style>
-    </head>
-    <body>
-            
-        <div class="side-nav">
-            <h3 class="brand-title">Foodie Friendly</h3>  
-
-            <div class="nav-items">
-            <a href="{{ route('home') }}" class="nav-item {{ request()->routeIs('home') ? 'active' : '' }}">
-        <i class="bi bi-house-door-fill"></i> Home
-    </a>
-                <!-- <a href="#" class="nav-item">
-                    <i class="bi bi-search"></i> Search
-                </a> -->
-                <a href="{{ route('cart') }}" class="nav-item {{ request()->routeIs('cart') ? 'active' : '' }}"> <i class="bi bi-cart3"></i> Cart<span class="badge bg-brown rounded-pill ms-2">3</span></a>
-            
-                <a href="{{ route('tracker') }}" class="tracker-btn {{ request()->routeIs('tracker') ? 'active' : '' }}">
-        <i class="bi bi-eye"></i> View Tracker
-        <span class="badge bg-brown rounded-pill ms-2">3</span>
-    </a>
-            
-                <a href="{{ route('profile') }}" class="nav-item {{ request()->routeIs('profile') ? 'active' : '' }}"> <i class="bi bi-person"></i> Profile</a>
-                <!-- Logout Link -->
-                <a href="{{ route('logout') }}" 
-                class="nav-item logout-link" 
-                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-
-                <!-- Hidden Logout Form -->
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                    @csrf
-                </form>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title', 'Foodie Friendly')</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .bg-brown { background: linear-gradient(to right, #8B4513, #A67B5B); }
+        .text-brown { color: #8B4513; }
+        .btn-brown { 
+            background-color: #A67B5B;
+            border-color: #8B4513;
+            color: white;
+        }
+        .btn-brown:hover {
+            background-color: #8B4513;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand text-brown" href="{{ route('home') }}">Foodie Friendly</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    @auth
+                        @if (Auth::user()->role === 'admin')
+                            <li class="nav-item">
+                                <a class="nav-link text-brown" href="{{ route('admin.dashboard') }}">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-brown" href="{{ route('admin.order_categories') }}">Manage Food</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-brown" href="{{ route('admin.order_menu') }}">Orders</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-brown" href="{{ route('admin.riders.index') }}">Riders</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-brown" href="{{ route('admin.sales_report') }}">Sales Report</a>
+                            </li>
+                        @else
+                            <li class="nav-item">
+                                <a class="nav-link text-brown" href="{{ route('home') }}">Food Menu</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-brown" href="{{ route('cart') }}">Cart</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-brown" href="{{ route('order-history') }}">My Orders</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-brown" href="{{ route('tracker') }}">Track Order</a>
+                            </li>
+                        @endif
+                        <li class="nav-item">
+                            <a class="nav-link text-brown" href="{{ route('profile') }}">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="nav-link btn btn-link text-brown">Logout</button>
+                            </form>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a class="nav-link text-brown" href="{{ route('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-brown" href="{{ route('register') }}">Register</a>
+                        </li>
+                    @endauth
+                    <li class="nav-item">
+                        <a class="nav-link text-brown" href="{{ route('about') }}">About</a>
+                    </li>
+                </ul>
             </div>
         </div>
-        <div class="container-fluid px-0">
-            @yield('content')
-        </div>
-    </body>
-    </html>
+    </nav>
+    <main class="py-4">
+        @yield('content')
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,5 +1,4 @@
 <?php
-
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -9,51 +8,19 @@ class FoodSeeder extends Seeder
 {
     public function run()
     {
-        $foods = [
-            [
-                'name' => 'Margherita Pizza',
-                'category' => 'Pizza',
-                'price' => 9.99
-            ],
-            [
-                'name' => 'Pepperoni Pizza',
-                'category' => 'Pizza',
-                'price' => 11.99
-            ],
-            [
-                'name' => 'Chicken Burger',
-                'category' => 'Burger',
-                'price' => 7.99
-            ],
-            [
-                'name' => 'Cheeseburger',
-                'category' => 'Burger',
-                'price' => 6.99
-            ],
-            [
-                'name' => 'Caesar Salad',
-                'category' => 'Salad',
-                'price' => 8.49
-            ],
-            [
-                'name' => 'French Fries',
-                'category' => 'Side',
-                'price' => 3.99
-            ],
-            [
-                'name' => 'Coca-Cola',
-                'category' => 'Drink',
-                'price' => 2.49
-            ]
-        ];
+        Food::create([
+            'name' => 'Whole Pizza',
+            'description' => 'Delicious 12" pizza',
+            'price' => 499,
+            'image' => 'pizza.jpg',
+        ]);
 
-        foreach ($foods as $food) {
-            Food::firstOrCreate(
-                ['name' => $food['name']],
-                $food
-            );
-        }
-
-        $this->command->info('Sample food items seeded successfully!');
+        Food::create([
+            'name' => 'BSK Burger',
+            'description' => 'Juicy beef burger',
+            'price' => 199,
+            'image' => 'burger.jpg',
+        ]);
+        $this->command->info('Food created successfully!');
     }
 }

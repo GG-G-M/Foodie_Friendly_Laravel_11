@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\ProfileController;
+use App\Http\Controllers\Customer\CartController; // Added
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SalesController;
 use App\Http\Controllers\Admin\FoodController;
@@ -37,9 +38,12 @@ Route::middleware(['auth', CheckRole::class . ':customer'])->group(function () {
     Route::get('/search', [FoodController::class, 'search'])->name('search');
 
     // Cart routes
-    Route::get('/cart', function () {
-        return view('customer.cart');
-    })->name('cart');
+    Route::get('/cart', [CartController::class, 'viewCart'])->name('cart');
+    Route::post('/cart/add/{foodId}', [CartController::class, 'addToCart'])->name('cart.add');
+    Route::patch('/cart/update/{id}', [CartController::class, 'updateCart'])->name('cart.update');
+    Route::delete('/cart/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+    Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
+    Route::get('/order-history', [CartController::class, 'orders'])->name('order-history');
 
     // Order tracker route
     Route::get('/tracker', function () {
@@ -77,8 +81,7 @@ Route::middleware(['auth', CheckRole::class . ':admin'])->group(function () {
     Route::delete('/foods/{food}', [FoodController::class, 'destroy'])->name('foods.destroy');
     
     // Order Menu Routes
-    Route::get('/order-menu', [OrderController::class, 'index'])->name('admin.order_menu');
-    Route::get('/orders/create', [OrderController::class, 'create'])->name('admin.orders.create');
+    Route::get('/order-menu', [OrderController::class, 'index'])->name('admin.order_menu');    Route::get('/orders/create', [OrderController::class, 'create'])->name('admin.orders.create');
     Route::post('/orders', [OrderController::class, 'store'])->name('admin.orders.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('admin.orders.show');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('admin.orders.cancel');
