@@ -1,170 +1,129 @@
 @extends('layouts.welcome_admin')
 
+@section('title', 'Order Categories')
+
 @section('content')
-<!-- Bootstrap Icons CDN -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
-<!-- Custom Styles -->
-<style>
-    body {
-        background-color: #f4f1ea;
-    }
-
-    .card {
-        border: 1px solid #a1866f;
-        background-color: #fffdf9;
-        box-shadow: 0 4px 8px rgba(161, 134, 111, 0.2);
-        border-radius: 12px;
-    }
-
-    .card-header {
-        background-color: #d2b48c;
-        color: #3e2f1c;
-        font-weight: bold;
-    }
-
-    .btn-primary {
-        background-color: #8b5e3c;
-        border-color: #8b5e3c;
-    }
-
-    .btn-primary:hover {
-        background-color: #71452d;
-        border-color: #71452d;
-    }
-
-    .btn-warning {
-        background-color: #ffc107;
-        border-color: #ffc107;
-        color: #fff;
-    }
-
-    .btn-warning:hover {
-        background-color: #e0a800;
-        border-color: #d39e00;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
-        color: #fff;
-    }
-
-    .btn-danger:hover {
-        background-color: #c82333;
-        border-color: #bd2130;
-    }
-
-    .btn i {
-        margin-right: 5px;
-    }
-
-    table thead {
-        background-color: #f0e0cf;
-    }
-
-    .table td,
-    .table th {
-        vertical-align: middle;
-    }
-
-    .alert-success {
-        background-color: #e5d6be;
-        color: #3e2f1c;
-        border-color: #c7b299;
-    }
-</style>
-
-<div class="container py-4">
-    <h2 class="mb-4 text-center text-brown">🍽️ Order Categories - Admin Panel</h2>
-
-  <!-- Add Food Item -->
-<div class="card mb-4">
-    <div class="card-header">➕ Add Food Item</div>
-    <div class="card-body">
-        <form action="{{ route('foods.store') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label for="name" class="form-label">Food Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
-                    @error('name') <span class="text-danger">{{ $message }}</span> @enderror
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="category" class="form-label">Category</label>
-                    <input type="text" class="form-control" id="category" name="category" required>
-                    @error('category') <span class="text-danger">{{ $message }}</span> @enderror
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="price" class="form-label">Price</label>
-                    <input type="number" class="form-control" id="price" name="price" step="0.01" required>
-                    @error('price') <span class="text-danger">{{ $message }}</span> @enderror
-                </div>
-            </div>
-
-            <!-- Image Upload Field -->
-            <div class="col-md-4 mb-3">
-                <label for="image" class="form-label">Food Image</label>
-                <input type="file" class="form-control" id="image" name="image" accept="image/*">
-                @error('image') <span class="text-danger">{{ $message }}</span> @enderror
-            </div>
-
-            <button type="submit" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Add Food
-            </button>
-        </form>
+<div class="admin-main">
+    <div class="admin-header">
+        <h2 style="color: var(--primary-color);">Add New Food Item</h2>
     </div>
-</div>
 
-    <!-- Food List -->
-    <div class="card">
-        <div class="card-header">📋 Food List</div>
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <!-- Add Food Form -->
+    <div class="admin-card mb-4">
         <div class="card-body">
-            @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
+            <form action="{{ route('foods.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" required>
+                        @error('name')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="description" name="description" value="{{ old('description') }}">
+                        @error('description')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label for="price" class="form-label">Price</label>
+                        <input type="number" step="0.01" class="form-control" id="price" name="price" value="{{ old('price') }}" required>
+                        @error('price')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <input type="text" class="form-control" id="category" name="category" value="{{ old('category') }}" placeholder="e.g., Pizza, Burger, Drink" required>
+                        @error('category')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label for="image" class="form-label">Image</label>
+                        <input type="file" class="form-control" id="image" name="image">
+                        @error('image')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-brown">
+                    Add Food
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Food Table -->
+    <div class="admin-card">
+        <div class="card-body">
+            <h5 style="color: var(--primary-color); margin-bottom: 1.5rem;">Food Items</h5>
+            @if($foods->isEmpty())
+                <p class="text-center">No food items available.</p>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead style="background-color: var(--primary-color); color: white;">
+                            <tr>
+                                <th>#</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Price</th>
+                                <th>Category</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($foods as $food)
+                                <tr>
+                                    <td>{{ $food->id }}</td>
+                                    <td>
+                                        @if($food->image)
+                                            <img src="{{ str_starts_with($food->image, 'http') ? $food->image : asset('storage/' . $food->image) }}" alt="{{ $food->name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                                        @else
+                                            <span>No Image</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $food->name }}</td>
+                                    <td>{{ $food->description ?? 'N/A' }}</td>
+                                    <td>₱{{ number_format($food->price, 2) }}</td>
+                                    <td>{{ $food->category }}</td>
+                                    <td>
+                                        <a href="{{ route('foods.edit', $food) }}" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+                                        <form action="{{ route('foods.destroy', $food) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to delete this food item?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3">
+                    {{ $foods->links() }}
                 </div>
             @endif
-            
-            <table class="table table-striped align-middle">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($foods as $food)
-                        <tr>
-                            <td>{{ $food->id }}</td>
-                            <td>{{ $food->name }}</td>
-                            <td>{{ $food->category }}</td>
-                            <td>${{ number_format($food->price, 2) }}</td>
-                            <td>
-                                <a href="{{ route('foods.edit', $food->id) }}" class="btn btn-sm btn-warning text-white">
-                                    <i class="bi bi-pencil-square"></i> Edit
-                                </a>
-                                <form action="{{ route('foods.destroy', $food->id) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" 
-                                            onclick="return confirm('Are you sure you want to delete this item?')">
-                                        <i class="bi bi-trash"></i> Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-
-            <!-- Pagination -->
-            <div class="d-flex justify-content-center mt-4">
-                {{ $foods->links() }}
-            </div>
         </div>
     </div>
 </div>

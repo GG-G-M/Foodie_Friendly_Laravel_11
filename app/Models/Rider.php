@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
 class Rider extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
 
     protected $fillable = [
         'name',
@@ -16,7 +15,7 @@ class Rider extends Authenticatable
         'password',
         'phone',
         'license_code',
-        'status'
+        'status',
     ];
 
     protected $hidden = [
@@ -24,11 +23,8 @@ class Rider extends Authenticatable
         'remember_token',
     ];
 
-    protected function casts(): array
+    public function order()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasOne(Order::class, 'riderID');
     }
 }

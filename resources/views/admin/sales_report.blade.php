@@ -3,119 +3,145 @@
 @section('title', 'Sales Report')
 
 @section('content')
-    <div class="container-fluid px-4 py-2" style="background-color: #F4E1C1;"> <!-- Light brown background -->
-        <!-- Summary Cards - Tight Layout -->
-        <div class="row g-2 mb-3"> <!-- Increased gutter for spacing -->
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #D8B69D;"> <!-- Light brown card background -->
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-dollar-sign text-primary me-2"></i>
-                        <div>
-                            <small class="text-muted d-block">Total Sales</small>
-                            <strong>${{ number_format($totalSales, 2) }}</strong>
-                        </div>
+<div class="container py-4" style="background-color: #f4ece3; border-radius: 15px;">
+    <h2 class="mb-4 text-center" style="color: #5D3A00;"><i class="fas fa-chart-bar me-2"></i> Sales Report</h2>
+
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <!-- Date Filter Form -->
+    <div class="card shadow-sm mb-4" style="background-color: #fff7f0;">
+        <div class="card-body">
+            <h5 style="color: #5D3A00;"><i class="fas fa-filter me-2"></i> Filter Sales by Date</h5>
+            <form action="{{ route('admin.sales_report.filter') }}" method="POST">
+                @csrf
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request('start_date') }}" required>
+                    </div>
+                    <div class="col-md-5 mb-3">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request('end_date') }}" required>
+                    </div>
+                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                        <button type="submit" class="btn w-100" style="background-color: #d2b48c; color: white;">
+                            <i class="fas fa-search me-1"></i> Filter
+                        </button>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #D8B69D;">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-receipt text-success me-2"></i>
-                        <div>
-                            <small class="text-muted d-block">Total Orders</small>
-                            <strong>{{ $totalOrders }}</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #D8B69D;">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-calculator text-info me-2"></i>
-                        <div>
-                            <small class="text-muted d-block">Avg. Order</small>
-                            <strong>${{ number_format($avgOrder, 2) }}</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #D8B69D;">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-star text-warning me-2"></i>
-                        <div>
-                            <small class="text-muted d-block">Popular Item</small>
-                            <strong>{{ $popularItem }} ({{ $popularCount }})</strong>
-                        </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-2 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100" style="background-color: #fff7f0;">
+                <div class="card-body d-flex align-items-center">
+                    <i class="fas fa-dollar-sign text-primary me-2" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <small class="text-muted d-block">Total Sales</small>
+                        <strong>₱{{ number_format($totalSales, 2) }}</strong>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100" style="background-color: #fff7f0;">
+                <div class="card-body d-flex align-items-center">
+                    <i class="fas fa-receipt text-success me-2" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <small class="text-muted d-block">Total Orders</small>
+                        <strong>{{ $totalOrders }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100" style="background-color: #fff7f0;">
+                <div class="card-body d-flex align-items-center">
+                    <i class="fas fa-calculator text-info me-2" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <small class="text-muted d-block">Avg. Order</small>
+                        <strong>₱{{ number_format($avgOrder, 2) }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100" style="background-color: #fff7f0;">
+                <div class="card-body d-flex align-items-center">
+                    <i class="fas fa-star text-warning me-2" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <small class="text-muted d-block">Popular Item</small>
+                        <strong>{{ $popularItem }} ({{ $popularCount }})</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <!-- Charts - Compact -->
-        <div class="row g-2 mb-3">
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #D8B69D;">
-                    <h6 class="mb-1 px-3 text-dark">Weekly Sales Trend</h6>
+    <!-- Charts -->
+    <div class="row g-2 mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm h-100" style="background-color: #fff7f0;">
+                <div class="card-body">
+                    <h6 style="color: #5D3A00;">Weekly Sales Trend</h6>
                     <div style="height: 200px;">
                         <canvas id="weeklyChart"></canvas>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #D8B69D;">
-                    <h6 class="mb-1 px-3 text-dark">Sales by Category</h6>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100" style="background-color: #fff7f0;">
+                <div class="card-body">
+                    <h6 style="color: #5D3A00;">Sales by Category</h6>
                     <div style="height: 200px;">
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-<!-- Recent Orders - Organized and Modern Layout -->
-<div class="card border-0 shadow-sm mb-3" style="background-color: #D8B69D;">
-    <div class="card-body p-4">
-        <h6 class="text-dark mb-4">Recent Orders</h6>
+    </div>
 
-        <!-- Order #1 -->
-        <div class="d-flex mb-3 p-3 rounded bg-light shadow-sm">
-            <div class="me-3">
-                <span class="badge" style="background-color: #D2B48C; color: white; font-size: 1.25rem;">#1001</span>
-            </div>
-            <div class="flex-grow-1">
-                <div class="fw-bold">2 Pepperoni Pizzas</div>
-                <div class="text-muted">Total: $31.98</div>
-            </div>
-            <div>
-                <span class="badge bg-success">Completed</span>
-            </div>
-        </div>
-
-        <!-- Order #2 -->
-        <div class="d-flex mb-3 p-3 rounded bg-light shadow-sm">
-            <div class="me-3">
-                <span class="badge" style="background-color: #D2B48C; color: white; font-size: 1.25rem;">#1002</span>
-            </div>
-            <div class="flex-grow-1">
-                <div class="fw-bold">Cheese Pizza + Drink</div>
-                <div class="text-muted">Total: $16.50</div>
-            </div>
-            <div>
-                <span class="badge bg-success">Completed</span>
-            </div>
-        </div>
-
-        <!-- Order #3 -->
-        <div class="d-flex mb-3 p-3 rounded bg-light shadow-sm">
-            <div class="me-3">
-                <span class="badge" style="background-color: #D2B48C; color: white; font-size: 1.25rem;">#1003</span>
-            </div>
-            <div class="flex-grow-1">
-                <div class="fw-bold">Burger Meal</div>
-                <div class="text-muted">Total: $14.25</div>
-            </div>
-            <div>
-                <span class="badge bg-warning">Pending</span>
-            </div>
+    <!-- Recent Orders -->
+    <div class="card shadow-sm" style="background-color: #fff7f0;">
+        <div class="card-body">
+            <h6 style="color: #5D3A00; margin-bottom: 1.5rem;">Recent Orders</h6>
+            @if($recentOrders->isEmpty())
+                <p class="text-center">No recent orders available.</p>
+            @else
+                @foreach($recentOrders as $order)
+                    <div class="d-flex mb-3 p-3 rounded bg-light shadow-sm">
+                        <div class="me-3">
+                            <span class="badge" style="background-color: #d2b48c; color: white; font-size: 1.25rem;">#{{ $order->id }}</span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">
+                                @foreach($order->orderItems as $item)
+                                    {{ $item->quantity }} {{ $item->food->name }}{{ $loop->last ? '' : ', ' }}
+                                @endforeach
+                            </div>
+                            <div class="text-muted">Total: ₱{{ number_format($order->total_amount, 2) }}</div>
+                        </div>
+                        <div>
+                            <span class="badge {{ $order->status === 'delivered' ? 'bg-success' : 'bg-warning' }}">
+                                {{ ucfirst($order->status) }}
+                            </span>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
         </div>
     </div>
 </div>
@@ -141,7 +167,7 @@
             scales: {
                 y: { 
                     beginAtZero: true,
-                    ticks: { callback: v => '$'+v }
+                    ticks: { callback: v => '₱'+v }
                 }
             }
         }
@@ -163,7 +189,7 @@
                 legend: { position: 'right' },
                 tooltip: {
                     callbacks: {
-                        label: ctx => `${ctx.label}: $${ctx.raw} (${Math.round(ctx.parsed)}%)`
+                        label: ctx => `${ctx.label}: ₱${ctx.raw}`
                     }
                 }
             }

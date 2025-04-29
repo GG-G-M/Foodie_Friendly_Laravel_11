@@ -1,65 +1,62 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\Food;
-use App\Models\User;
 use App\Models\OrderItem;
+use App\Models\User;
+use App\Models\Food;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::with('user', 'orderItems.food')->paginate(10);
+        $orders = Order::with('user')->paginate(10);
         return view('admin.order_menu', compact('orders'));
     }
 
     public function create()
     {
-        $foods = Food::all();
         $customers = User::where('role', 'customer')->get();
-        return view('admin.orders.create', compact('foods', 'customers'));
+        $foods = Food::all();
+        return view('admin.orders.create', compact('customers', 'foods'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'customer_id' => 'required|exists:users,id',
-            'items' => 'required|array',
+            'delivery_address' => 'required|string|max:255',
+            'items' => 'required|array|min:1',
             'items.*.food_id' => 'required|exists:foods,id',
             'items.*.quantity' => 'required|integer|min:1',
         ]);
 
-        // Calculate totals
-        $subtotal = 0;
-        $deliveryFee = 50;
-        $taxRate = 0.1;
-
+        // Calculate total amount
+        $totalAmount = 0;
         foreach ($request->items as $item) {
-            $food = Food::findOrFail($item['food_id']);
-            $subtotal += $food->price * $item['quantity'];
+            $food = Food::find($item['food_id']);
+            $totalAmount += $food->price * $item['quantity'];
         }
-
-        $tax = $subtotal * $taxRate;
-        $totalAmount = $subtotal + $deliveryFee + $tax;
 
         // Create the order
         $order = Order::create([
             'user_id' => $request->customer_id,
             'total_amount' => $totalAmount,
+            'delivery_address' => $request->delivery_address,
             'status' => 'pending',
+            'order_date' => now(),
         ]);
 
         // Create order items
         foreach ($request->items as $item) {
-            $food = Food::findOrFail($item['food_id']);
             OrderItem::create([
                 'order_id' => $order->id,
                 'food_id' => $item['food_id'],
                 'quantity' => $item['quantity'],
-                'price' => $food->price,
+                'price' => Food::find($item['food_id'])->price,
             ]);
         }
 
@@ -68,21 +65,41 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load('user', 'orderItems.food');
+        $order->load('user', 'rider', 'orderItems.food'); // Eager-load relationships
         return view('admin.orders.show', compact('order'));
-    }
-
-    public function complete(Order $order)
-    {
-        $order->status = 'completed';
-        $order->save();
-        return redirect()->route('admin.order_menu')->with('success', 'Order marked as completed!');
     }
 
     public function cancel(Order $order)
     {
-        $order->status = 'cancelled';
-        $order->save();
-        return redirect()->route('admin.order_menu')->with('success', 'Order cancelled!');
+        $order->update(['status' => 'cancelled']);
+        return redirect()->route('admin.order_menu')->with('success', 'Order cancelled successfully.');
+    }
+
+    public function startDelivery(Order $order)
+    {
+        if ($order->status !== 'pending') {
+            return redirect()->route('admin.order_menu')->with('error', 'Only pending orders can be moved to delivering.');
+        }
+        $order->update(['status' => 'delivering']);
+        return redirect()->route('admin.order_menu')->with('success', 'Order status updated to delivering.');
+    }
+
+    public function completeDelivery(Order $order)
+    {
+        if ($order->status !== 'delivering') {
+            return redirect()->route('admin.order_menu')->with('error', 'Only delivering orders can be marked as delivered.');
+        }
+        $order->update(['status' => 'delivered']);
+        return redirect()->route('admin.order_menu')->with('success', 'Order status updated to delivered.');
+    }
+
+    public function updateStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,delivering,delivered,cancelled',
+        ]);
+
+        $order->update(['status' => $request->status]);
+        return redirect()->route('admin.order_menu')->with('success', 'Order status updated successfully.');
     }
 }
