@@ -15,6 +15,8 @@ return new class extends Migration
             $table->decimal('total_amount', 8, 2);
             $table->string('delivery_address')->nullable();
             $table->enum('status', ['pending', 'delivering', 'delivered', 'cancelled'])->default('pending');
+            $table->string('payment_status')->default('pending'); // Added
+            $table->string('payment_method')->nullable(); // Added
             $table->timestamp('order_date')->useCurrent();
             $table->timestamps();
         });

@@ -30,9 +30,7 @@ Route::get('/', function () {
 | Guest Routes
 |--------------------------------------------------------------------------
 |
-| Routes for unauthenticated users, such as login and registration.
-| These routes are protected by the 'guest' middleware to prevent logged-in users from accessing them.
-|
+
 */
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -47,17 +45,19 @@ Route::middleware('guest')->group(function () {
 | Authenticated Routes
 |--------------------------------------------------------------------------
 |
-| Routes for authenticated users, such as logout and profile pages.
-| These routes are protected by the 'auth' middleware.
-|
 */
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
 });
 
-// Customer routes (protected by auth and customer role)
+/*
+|--------------------------------------------------------------------------
+| Customer Routes
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', CheckRole::class . ':customer'])->group(function () {
+    Route::get('/home', [CartController::class, 'index'])->name('home');
     Route::get('/cart', [CartController::class, 'viewCart'])->name('cart');
     Route::post('/cart/add/{foodId}', [CartController::class, 'addToCart'])->name('cart.add');
     Route::post('/cart/update/{id}', [CartController::class, 'updateCart'])->name('cart.update');
@@ -65,6 +65,7 @@ Route::middleware(['auth', CheckRole::class . ':customer'])->group(function () {
     Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::get('/order-history', [CartController::class, 'orders'])->name('order-history');
     Route::get('/tracker', [CartController::class, 'tracker'])->name('tracker');
+    Route::get('/order/{id}/status', [CartController::class, 'getOrderStatus'])->name('order.status');
 });
 
 /*

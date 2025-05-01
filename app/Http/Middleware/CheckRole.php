@@ -27,7 +27,7 @@ class CheckRole
             // 4. Then determine where to redirect
             $redirectRoute = match($user->role) {
                 'admin' => 'admin.dashboard',
-                'customer' => 'home',
+                'customer' => 'cart',
                 default => null
             };
 

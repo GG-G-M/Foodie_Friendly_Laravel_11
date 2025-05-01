@@ -1,76 +1,128 @@
 @extends('layouts.app')
 
-@section('content')
-<div class="container py-4" style="background-color: #f4ece3; border-radius: 15px;">
-    <h2 class="mb-4 text-center" style="color: #5D3A00;">🛍️ Your Cart</h2>
+@section('title', 'Cart')
 
-    @if(session('success'))
-        <div class="alert alert-success">
+@section('content')
+<div class="container mt-4">
+    <h1 class="mb-4">Your Cart</h1>
+
+    <!-- Success/Error Messages -->
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert" id="success-alert">
             {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger">
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
             {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     @if($cartItems->isEmpty())
-        <p class="text-center">Your cart is empty.</p>
+        <div class="text-center">
+            <p>Your cart is empty.</p>
+            <a href="{{ route('home') }}" class="btn btn-brown">Browse Menu</a>
+        </div>
     @else
-        <table class="table table-bordered table-hover table-light">
-            <thead class="table-dark" style="background-color: #a97c50; color: white;">
-                <tr>
-                    <th>Food</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($cartItems as $item)
-                    <tr>
-                        <td>{{ $item->food->name }}</td>
-                        <td>₱{{ number_format($item->food->price, 2) }}</td>
-                        <td>
-                            <form action="{{ route('cart.update', $item->id) }}" method="POST">
-                                @csrf
-                                @method('PATCH')
-                                <input type="number" name="quantity" value="{{ $item->quantity }}" min="1" style="width: 60px;">
-                                <button type="submit" class="btn btn-sm btn-primary">Update</button>
-                            </form>
-                        </td>
-                        <td>₱{{ number_format($item->food->price * $item->quantity, 2) }}</td>
-                        <td>
-                            <form action="{{ route('cart.remove', $item->id) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <div class="text-end">
-            <h5>Total: ₱{{ number_format($cartItems->sum(fn($item) => $item->food->price * $item->quantity), 2) }}</h5>
-            <form action="{{ route('checkout') }}" method="GET">
-                <div class="mb-3">
-                    <label for="delivery_address" class="form-label">Delivery Address</label>
-                    <input type="text" class="form-control" id="delivery_address" name="delivery_address" required>
+        <!-- Cart Items -->
+        <div class="card shadow-sm border-0 mb-4" style="background-color: #fefaf3;">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="text-white" style="background-color: #3e3e3e;">
+                            <tr>
+                                <th>Image</th> <!-- Added Image column -->
+                                <th>Item</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($cartItems as $item)
+                                <tr>
+                                    <td>
+                                        <img src="{{ asset('storage/' . $item->food->image) }}" alt="{{ $item->food->name }}" style="width: 50px; height: 50px; object-fit: cover;">
+                                    </td> <!-- Display the food image -->
+                                    <td>{{ $item->food->name }}</td>
+                                    <td>₱{{ number_format($item->food->price, 2) }}</td>
+                                    <td>
+                                        <form action="{{ route('cart.update', $item->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <div class="input-group" style="width: 120px;">
+                                                <input type="number" name="quantity" value="{{ $item->quantity }}" min="1" class="form-control border-brown" style="background-color: #fffaf2;">
+                                                <button type="submit" class="btn btn-outline-primary btn-sm"><i class="bi bi-arrow-repeat"></i></button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                    <td>₱{{ number_format($item->quantity * $item->food->price, 2) }}</td>
+                                    <td>
+                                        <form action="{{ route('cart.remove', $item->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to remove this item?')">
+                                                <i class="bi bi-trash"></i> Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-                <button type="submit" class="btn btn-success">Checkout</button>
-            </form>
+                <div class="text-end mt-3">
+                    <h5>Total: ₱{{ number_format($total, 2) }}</h5>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout Form -->
+        <div class="card shadow-sm border-0" style="background-color: #fefaf3;">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">Checkout</h5>
+                <form action="{{ route('cart.checkout') }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="payment_method" class="form-label">Payment Method</label>
+                        <select name="payment_method" id="payment_method" class="form-select @error('payment_method') is-invalid @enderror" style="background-color: #fffaf2;" required>
+                            <option value="Cash on Delivery">Cash on Delivery</option>
+                            <option value="GCash">GCash</option>
+                            <option value="PayMaya">PayMaya</option>
+                        </select>
+                        @error('payment_method')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="delivery_address" class="form-label">Delivery Address</label>
+                        <textarea name="delivery_address" id="delivery_address" class="form-control @error('delivery_address') is-invalid @enderror" style="background-color: #fffaf2;" required>{{ old('delivery_address') }}</textarea>
+                        @error('delivery_address')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-brown">
+                            <i class="bi bi-checkout me-1"></i> Place Order
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     @endif
 </div>
 
-<style>
-    body {
-        background-color: #eaddcf;
-    }
-</style>
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const successAlert = document.getElementById('success-alert');
+            if (successAlert) {
+                setTimeout(() => {
+                    successAlert.classList.remove('show');
+                }, 3000);
+            }
+        });
+    </script>
+@endsection
 @endsection

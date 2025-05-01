@@ -11,11 +11,17 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
-        'riderID',
+        'rider_id',
         'total_amount',
         'delivery_address',
         'status',
+        'payment_status',
+        'payment_method',
         'order_date',
+    ];
+
+    protected $casts = [
+        'order_date' => 'datetime',
     ];
 
     public function user()
@@ -25,11 +31,11 @@ class Order extends Model
 
     public function rider()
     {
-        return $this->belongsTo(Rider::class, 'riderID');
+        return $this->belongsTo(Rider::class, 'rider_id');
     }
 
     public function orderItems()
     {
-        return $this->hasMany(OrderItem::class, 'order_id'); // Changed from 'orderID' to 'order_id'
+        return $this->hasMany(OrderItem::class, 'order_id');
     }
 }
