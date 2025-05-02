@@ -55,7 +55,16 @@ class CartController extends Controller
         $validated = $request->validate([
             'quantity' => 'required|integer|min:1',
         ]);
+
         $cartItem->update(['quantity' => $validated['quantity']]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'quantity' => $cartItem->quantity,
+            ]);
+        }
+
         return redirect()->route('cart')->with('success', 'Cart updated!');
     }
 
@@ -104,19 +113,41 @@ class CartController extends Controller
 
         Cart::where('user_id', Auth::id())->delete();
 
-        return redirect()->route('tracker')->with('success', 'Order placed successfully!');
+        return redirect()->route('order-history')->with('success', 'Order placed successfully!');
     }
 
     public function orders()
     {
         $orders = Order::where('user_id', Auth::id())->with('orderItems.food')->paginate(10);
-        return view('customer.order-history', compact('orders')); 
+        return view('customer.order-history', compact('orders'));
     }
 
-    public function tracker()
+    public function viewOrder($id)
     {
-        $orders = Order::where('user_id', Auth::id())->with('orderItems.food', 'rider')->paginate(10);
-        return view('customer.tracker', compact('orders'));
+        $order = Order::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->with('orderItems.food', 'rider')
+            ->firstOrFail();
+        return view('customer.order-details', compact('order'));
+    }
+
+    public function cancelOrder($id)
+    {
+        $order = Order::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        if ($order->status !== 'pending') {
+            return redirect()->route('order.view', $order->id)
+                ->with('error', 'Order cannot be canceled because it is already ' . ucfirst($order->status) . '.');
+        }
+
+        $order->update([
+            'status' => 'cancelled',
+        ]);
+
+        return redirect()->route('order.view', $order->id)
+            ->with('success', 'Order canceled successfully!');
     }
 
     public function getOrderStatus($id)

@@ -19,7 +19,6 @@
             color: white;
         }
         body { background-color: #f8f1e9; }
-        .border-brown { border-color: #8B4513 !important; }
     </style>
 </head>
 <body>
@@ -48,7 +47,7 @@
                             <li class="nav-item">
                                 <a class="nav-link text-white" href="{{ route('admin.sales_report') }}">Sales Report</a>
                             </li>
-                        @elseif (Auth::user()->role === 'customer')
+                        @else
                             <li class="nav-item">
                                 <a class="nav-link text-white" href="{{ route('home') }}">Food Menu</a>
                             </li>
@@ -59,14 +58,11 @@
                                 <a class="nav-link text-white" href="{{ route('order-history') }}">My Orders</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-white" href="{{ route('tracker') }}">Track Order</a>
+                                <a class="nav-link text-white" href="{{ route('profile') }}">Profile</a>
                             </li>
                         @endif
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="{{ route('profile') }}">Profile</a>
-                        </li>
-                        <li class="nav-item">
-                            <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                            <form action="{{ route('logout') }}" method="POST">
                                 @csrf
                                 <button type="submit" class="nav-link btn btn-link text-white">Logout</button>
                             </form>

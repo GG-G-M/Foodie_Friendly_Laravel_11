@@ -33,7 +33,7 @@
                     <table class="table table-bordered table-hover mb-0">
                         <thead class="text-white" style="background-color: #3e3e3e;">
                             <tr>
-                                <th>Image</th> <!-- Added Image column -->
+                                <th>Image</th>
                                 <th>Item</th>
                                 <th>Price</th>
                                 <th>Quantity</th>
@@ -46,7 +46,7 @@
                                 <tr>
                                     <td>
                                         <img src="{{ asset('storage/' . $item->food->image) }}" alt="{{ $item->food->name }}" style="width: 50px; height: 50px; object-fit: cover;">
-                                    </td> <!-- Display the food image -->
+                                    </td>
                                     <td>{{ $item->food->name }}</td>
                                     <td>₱{{ number_format($item->food->price, 2) }}</td>
                                     <td>

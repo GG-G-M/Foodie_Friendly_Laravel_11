@@ -64,7 +64,8 @@ Route::middleware(['auth', CheckRole::class . ':customer'])->group(function () {
     Route::post('/cart/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
     Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::get('/order-history', [CartController::class, 'orders'])->name('order-history');
-    Route::get('/tracker', [CartController::class, 'tracker'])->name('tracker');
+    Route::get('/order/{id}', [CartController::class, 'viewOrder'])->name('order.view'); // Ensure this route is defined
+    Route::post('/order/{id}/cancel', [CartController::class, 'cancelOrder'])->name('order.cancel');
     Route::get('/order/{id}/status', [CartController::class, 'getOrderStatus'])->name('order.status');
 });
 
@@ -119,10 +120,10 @@ Route::middleware(['auth', CheckRole::class . ':admin'])->group(function () {
 });
 
 // Rider routes (protected by auth and rider role)
-Route::middleware(['auth', CheckRole::class . ':rider'])->prefix('rider')->group(function () {
-    Route::get('/dashboard', [RiderDashboardController::class, 'index'])->name('rider.dashboard');
-    Route::post('/orders/{order}/select', [RiderDashboardController::class, 'selectOrder'])->name('rider.select_order');
-    Route::post('/orders/{order}/update-status', [RiderDashboardController::class, 'updateStatus'])->name('rider.update_status');
+Route::middleware(['auth', CheckRole::class . ':rider'])->prefix('rider')->name('rider.')->group(function () {
+    Route::get('/dashboard', [RiderController::class, 'index'])->name('index');
+    Route::post('/start-delivery/{id}', [RiderController::class, 'startDelivery'])->name('startDelivery');
+    Route::post('/complete-delivery/{id}', [RiderController::class, 'completeDelivery'])->name('completeDelivery');
 });
 
 /*
