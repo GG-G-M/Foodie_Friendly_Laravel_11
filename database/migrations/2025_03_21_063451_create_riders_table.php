@@ -4,24 +4,21 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateRidersTable extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('riders', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->string('phone');
-            $table->string('license_code')->unique();
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Links to users table
+            $table->string('phone_number')->nullable();
+            $table->string('license_number')->nullable();
             $table->timestamps();
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('riders');
     }
-};
+}

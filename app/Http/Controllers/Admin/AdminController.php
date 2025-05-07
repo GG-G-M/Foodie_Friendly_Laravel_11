@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Rider;
 use App\Models\Order;
 use App\Models\Food;
 use Illuminate\Http\Request;
@@ -19,21 +20,19 @@ class AdminController extends Controller
     {
         try {
             $totalUsers = User::count();
-            $totalAdmins = User::where('role', 'admin')->count();  // Added this line
-            $totalCustomers = User::where('role', 'customer')->count();  // Added this line
+            $totalAdmins = User::where('role', 'admin')->count();
+            $totalCustomers = User::where('role', 'customer')->count();
+            $totalRiders = User::where('role', 'rider')->count();
             
-            // $totalOrders = Order::count();
-            // $totalRevenue = Order::sum('total_price');
-            // $recentOrders = Order::latest()->take(5)->get();
-    
             $totalOrders = 2.355;
             $totalRevenue = 5.2222;
             $recentOrders = 5.22222;
     
             return view('admin.dashboard', compact(
                 'totalUsers',
-                'totalAdmins',       // Added this
-                'totalCustomers',    // Added this
+                'totalAdmins',
+                'totalCustomers',
+                'totalRiders',
                 'totalOrders',
                 'totalRevenue',
                 'recentOrders'
@@ -44,180 +43,180 @@ class AdminController extends Controller
         }
     }
 
-
-//-------------------------------------USER MANAGEMENTSECTION---------------------------------------
-    /**x
+    //-------------------------------------USER MANAGEMENT SECTION---------------------------------------
+    /**
      * Display the user management page.
      *
      * @return \Illuminate\View\View
      */
     public function userManagement(Request $request)
-{
-    try {
-        $query = User::query();
-        
-        // Search functionality
-        if ($request->has('search')) {
-            $searchTerm = $request->input('search');
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('email', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('role', 'LIKE', "%{$searchTerm}%");
-            });
+    {
+        try {
+            $query = User::with('rider');
+            
+            if ($request->has('search')) {
+                $searchTerm = $request->input('search');
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('name', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('email', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('role', 'LIKE', "%{$searchTerm}%");
+                });
+            }
+
+            if ($request->has('role_filter') && in_array($request->role_filter, ['admin', 'customer', 'rider'])) {
+                $query->where('role', $request->role_filter);
+            }
+            
+            $sortOrder = $request->input('sort_order', 'desc');
+            $query->orderBy('id', $sortOrder);
+
+            $users = $query->paginate(10);
+            $totalUsers = User::count();
+            $totalCustomers = User::where('role', 'customer')->count();
+            $totalAdmins = User::where('role', 'admin')->count();
+            $totalRiders = User::where('role', 'rider')->count();
+
+            return view('admin.user_management', compact(
+                'users',
+                'totalUsers',
+                'totalCustomers',
+                'totalAdmins',
+                'totalRiders'
+            ));
+        } catch (\Exception $e) {
+            error_log('Error fetching users: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while fetching users.');
         }
-
-        // Role filter
-        if ($request->has('role_filter') && in_array($request->role_filter, ['admin', 'customer'])) {
-            $query->where('role', $request->role_filter);
-        }
-        
-        // Sorting functionality (by ID)
-        $sortOrder = $request->input('sort_order', 'desc'); // Default to 'desc' if no sort order is provided
-        $query->orderBy('id', $sortOrder); // Sort by ID
-
-        $users = $query->paginate(10);
-        $totalUsers = User::count();
-        $totalCustomers = User::where('role', 'customer')->count();
-        $totalAdmins = User::where('role', 'admin')->count();
-
-        return view('admin.user_management', compact(
-            'users', 
-            'totalUsers',
-            'totalCustomers',
-            'totalAdmins'
-        ));
-    } catch (\Exception $e) {
-        error_log('Error fetching users: ' . $e->getMessage());
-        return redirect()->back()->with('error', 'An error occurred while fetching users.');
     }
-}
 
-//CREATE BUTTON [3]
-// Show the create form
-public function create()
-{
-    return view('admin.users.create'); 
-}
-
-// Store the new user
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|confirmed', // 'confirmed' checks password_confirmation
-        'role' => 'required|in:admin,customer',
-    ], [
-        'password.confirmed' => 'The passwords do not match.',
-    ]);
-
-    try {
-        User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
-            'role' => $validated['role'],
-        ]);
-
-        return redirect()->route('admin.user_management')
-               ->with('success', 'User created successfully!');
-    } catch (\Exception $e) {
-        return back()->with('error', 'Error creating user: ' . $e->getMessage())
-                    ->withInput(); // This preserves old input
+    // CREATE BUTTON [3]
+    public function create()
+    {
+        return view('admin.users.create');
     }
-}
 
-
-// EDIT BUTTON [3]
-// Display the edit form
-public function edit(User $user)
-{
-    return view('admin.users.edit', compact('user'));
-}
-
-// EDIT BUTTON [5]
-
-// Process the update request
-public function update(Request $request, User $user)
-{
-    try {
-        $request->validate([
+    // Store the new user
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'role' => 'required|in:admin,customer', // Updated role validation
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|confirmed',
+            'role' => 'required|in:admin,customer,rider',
+            'phone_number' => 'nullable|string|max:20',
+            'license_number' => 'nullable|string|max:50',
+        ], [
+            'password.confirmed' => 'The passwords do not match.',
         ]);
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-        ]);
+        try {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => bcrypt($validated['password']),
+                'role' => $validated['role'],
+            ]);
 
-        return redirect()->route('admin.user_management')
-               ->with('success', 'User updated successfully!');
-    } catch (\Exception $e) {
-        return redirect()->back()
-               ->with('error', 'Error updating user: ' . $e->getMessage());
+            if ($validated['role'] === 'rider') {
+                Rider::create([
+                    'user_id' => $user->id,
+                    'phone_number' => $validated['phone_number'],
+                    'license_number' => $validated['license_number'],
+                ]);
+            }
+
+            return redirect()->route('admin.user_management')
+                   ->with('success', 'User created successfully!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error creating user: ' . $e->getMessage())
+                        ->withInput();
+        }
     }
-}
 
-//DELETE BUTTON [3]
-    public function destroy(User $user) 
-{
-    try {
-        $user->delete();
-        return redirect()->route('admin.user_management')->with('success', 'User deleted successfully!');
-    } catch (\Exception $e) {
-        error_log('Error deleting user: ' . $e->getMessage());
-        return redirect()->back()->with('error', 'Failed to delete user.');
+    // EDIT BUTTON [3]
+    public function edit(User $user)
+    {
+        return view('admin.users.edit', compact('user'));
     }
-}
 
-//Rider user controller
+    // Process the update request
+    public function update(Request $request, User $user)
+    {
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'role' => 'required|in:admin,customer,rider',
+                'phone_number' => 'nullable|string|max:20',
+                'license_number' => 'nullable|string|max:50',
+            ]);
 
-public function riderUsers()
-{
-    $riders = User::where('role', 'rider')->get(); // Adjust if you use a separate Rider model
-    return view('admin.rider_user', compact('riders'));
-}
+            $user->update([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'role' => $validated['role'],
+            ]);
 
+            if ($validated['role'] === 'rider') {
+                $rider = $user->rider ?? new Rider(['user_id' => $user->id]);
+                $rider->phone_number = $validated['phone_number'];
+                $rider->license_number = $validated['license_number'];
+                $rider->save();
+            } else {
+                if ($user->rider) {
+                    $user->rider->delete();
+                }
+            }
 
+            return redirect()->route('admin.user_management')
+                   ->with('success', 'User updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                   ->with('error', 'Error updating user: ' . $e->getMessage());
+        }
+    }
 
+    // DELETE BUTTON [3]
+    public function destroy(User $user)
+    {
+        try {
+            $user->delete();
+            return redirect()->route('admin.user_management')->with('success', 'User deleted successfully!');
+        } catch (\Exception $e) {
+            error_log('Error deleting user: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to delete user.');
+        }
+    }
 
+    // New method to view rider details
+    public function view(User $user)
+    {
+        if ($user->role !== 'rider' || !$user->rider) {
+            return redirect()->route('admin.user_management')->with('error', 'This user is not a rider or has no rider details.');
+        }
 
+        return view('admin.users.view', compact('user'));
+    }
 
+    // Rider user controller (optional, replaced by userManagement)
+    public function riderUsers()
+    {
+        return redirect()->route('admin.user_management', ['role_filter' => 'rider']);
+    }
 
-
-
-
-//-------------------------------------USER MANAGEMENTSECTION---------------------------------------
-
-
-//-------------------------------------ORDER MENU SECTION---------------------------------------
-    /**
-     * Display the order menu.
-     *
-     * @return \Illuminate\View\View
-     */
+    //-------------------------------------ORDER MENU SECTION---------------------------------------
     public function OrderCategories()
     {
         $foods = Food::orderBy('created_at', 'desc')->paginate(10);
         return view('admin.order_categories', compact('foods'));
     }
     
-    
-    public function orderMenu() {
-        
-        return view('admin.order_menu');
+    public function orderMenu()
+    {
+        $orders = Order::orderBy('created_at', 'desc')->paginate(10);
+        return view('admin.order_menu', compact('orders'));
     }
-    
 
-    /**
-     * Store a new food item.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function storeFood(Request $request)
     {
         try {
@@ -238,7 +237,5 @@ public function riderUsers()
             error_log('Error storing food item: ' . $e->getMessage());
             return redirect()->back()->with('error', 'An error occurred while adding the food item.');
         }
-    
     }
-
 }

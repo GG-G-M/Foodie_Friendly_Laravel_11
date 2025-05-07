@@ -3,7 +3,6 @@
 @section('title', 'Order Categories')
 
 @section('content')
-<div class="admin-main">
     <div class="admin-header">
         <h2 style="color: var(--primary-color);">Add New Food Item</h2>
     </div>
@@ -126,5 +125,4 @@
             @endif
         </div>
     </div>
-</div>
 @endsection

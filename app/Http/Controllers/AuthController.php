@@ -30,19 +30,26 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             
-            return Auth::user()->role === 'admin' 
-                ? redirect()->route('admin.dashboard')
-                : redirect()->route('home');
+            $user = Auth::user();
+            $redirectRoute = match ($user->role) {
+                'admin' => 'admin.dashboard',
+                'customer' => 'cart',
+                'rider' => 'rider.index',
+                default => 'cart', // Default to cart for undefined roles
+            };
+
+            return redirect()->intended(route($redirectRoute));
         }
     
         return back()->withErrors(['email' => 'Invalid credentials'])->onlyInput('email');
     }
+
     /**
      * Show registration page
      */
     public function showRegister()
     {
-        return view('auth.register'); // Ensure this file exists in resources/views/auth/register.blade.php
+        return view('auth.register');
     }
 
     /**
@@ -53,8 +60,8 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|confirmed', // 'confirmed' checks password_confirmation
-            'role' => 'required|in:admin,customer',
+            'password' => 'required|confirmed',
+            'role' => 'required|in:admin,customer,rider',
         ], [
             'password.confirmed' => 'The passwords do not match.',
         ]);
@@ -67,14 +74,13 @@ class AuthController extends Controller
                 'role' => $validated['role'],
             ]);
     
-            return redirect()->route('admin.user_management')
-                             ->with('success', 'User created successfully!');
+            return redirect()->route('login')
+                             ->with('success', 'Registration successful! Please log in.');
         } catch (\Exception $e) {
             return back()->with('error', 'Error creating user: ' . $e->getMessage())
                          ->withInput();
         }
     }
-    
 
     /**
      * Handle logout
@@ -83,8 +89,8 @@ class AuthController extends Controller
     {
         Auth::logout();
         
-        $request->session()->invalidate();  // Invalidates the session
-        $request->session()->regenerateToken();  // Regenerates CSRF token
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         
         return redirect()->route('login');
     }

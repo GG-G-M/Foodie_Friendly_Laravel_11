@@ -2,29 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 
-class Rider extends Authenticatable
+class Rider extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'phone',
-        'license_code',
-        'status',
+        'user_id',
+        'phone_number',
+        'license_number',
     ];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    public function order()
+    public function user()
     {
-        return $this->hasOne(Order::class, 'riderID');
+        return $this->belongsTo(User::class);
     }
 }

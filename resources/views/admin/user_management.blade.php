@@ -50,6 +50,10 @@
         background-color: #007bff;
     }
 
+    .badge-warning {
+        background-color: #ffc107;
+    }
+
     .search-bar {
         border-radius: 20px;
         border: 1px solid #ddd;
@@ -76,6 +80,17 @@
         background-color: #e0a800;
         border-color: #d39e00;
     }
+
+    .btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+        color: #fff;
+    }
+
+    .btn-info:hover {
+        background-color: #138496;
+        border-color: #117a8b;
+    }
 </style>
 
 <div class="container-fluid">
@@ -89,6 +104,7 @@
                         <option value="">All Roles</option>
                         <option value="admin" {{ request('role_filter') == 'admin' ? 'selected' : '' }}>Admins</option>
                         <option value="customer" {{ request('role_filter') == 'customer' ? 'selected' : '' }}>Customers</option>
+                        <option value="rider" {{ request('role_filter') == 'rider' ? 'selected' : '' }}>Riders</option>
                     </select>
                 </div>
             </form>
@@ -114,7 +130,7 @@
     </div>
 
     <div class="row mb-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -127,7 +143,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -140,7 +156,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -148,6 +164,19 @@
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Customers</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalCustomers }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Riders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalRiders }}</div>
                         </div>
                     </div>
                 </div>
@@ -181,7 +210,7 @@
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
                             <td>
-                                <span class="badge {{ $user->role === 'admin' ? 'badge-success' : 'badge-primary' }}">
+                                <span class="badge {{ $user->role === 'admin' ? 'badge-success' : ($user->role === 'customer' ? 'badge-primary' : 'badge-warning') }}">
                                     {{ $user->role }}
                                 </span>
                             </td>
@@ -196,6 +225,11 @@
                                         <i class="fas fa-trash"></i> Delete
                                     </button>
                                 </form>
+                                @if($user->role === 'rider')
+                                    <a href="{{ route('users.view', $user->id) }}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
