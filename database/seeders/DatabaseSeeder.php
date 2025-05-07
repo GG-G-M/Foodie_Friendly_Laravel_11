@@ -46,6 +46,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             FoodSeeder::class
         ]);
+
+        // Seed Order for customer
+        $this->call([
+            OrderSeeder::class
+        ]);
     
         $this->command->info('Default database seeded successfully!');
     }

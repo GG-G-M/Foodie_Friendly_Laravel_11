@@ -83,7 +83,7 @@ Route::middleware(['auth', CheckRole::class . ':admin'])->group(function () {
     Route::get('/users/{user}/edit', [AdminController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [AdminController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('users.destroy');
-    Route::get('/users/{user}/view', [AdminController::class, 'view'])->name('users.view'); // New route for view
+    Route::get('/users/{user}/view', [AdminController::class, 'view'])->name('users.view');
 
     // Rider Management (nested under /riders prefix)
     Route::prefix('riders')->group(function () {
@@ -121,8 +121,8 @@ Route::middleware(['auth', CheckRole::class . ':admin'])->group(function () {
 // Rider routes
 Route::middleware(['auth', CheckRole::class . ':rider'])->prefix('rider')->name('rider.')->group(function () {
     Route::get('/dashboard', [RiderDashboardController::class, 'index'])->name('index');
-    Route::post('/start-delivery/{id}', [RiderDashboardController::class, 'startDelivery'])->name('startDelivery');
-    Route::post('/complete-delivery/{id}', [RiderDashboardController::class, 'completeDelivery'])->name('completeDelivery');
+    Route::post('/start-delivery/{order}', [RiderDashboardController::class, 'startDelivery'])->name('startDelivery');
+    Route::post('/finish-delivery/{order}', [RiderDashboardController::class, 'finishDelivery'])->name('finishDelivery');
 });
 
 /*
