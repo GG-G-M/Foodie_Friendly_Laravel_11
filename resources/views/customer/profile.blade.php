@@ -77,9 +77,7 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex justify-content-between mt-4 pt-3 border-top border-brown">
-                        <button class="btn btn-outline-brown">
-                            <i class="bi bi-lock-fill me-2"></i>Change Password
-                        </button>
+                        
                         <button class="btn btn-brown">
                             <i class="bi bi-pencil-fill me-2"></i>Edit Profile
                         </button>

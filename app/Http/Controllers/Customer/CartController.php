@@ -118,7 +118,7 @@ class CartController extends Controller
 
     public function orders()
     {
-        $orders = Order::where('user_id', Auth::id())->with('orderItems.food')->paginate(10);
+        $orders = Order::where('user_id', Auth::id())->with('orderItems.food')->latest()->paginate(10);
         return view('customer.order-history', compact('orders'));
     }
 
