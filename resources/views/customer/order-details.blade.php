@@ -22,7 +22,7 @@
 
     <div class="card shadow-sm border-0 mb-4" style="background-color: #fefaf3;">
         <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #c8a879;">
-            <h5 class="fw-bold text-dark mb-0">Order Details - <span class="order-status">{{ ucfirst($order->status) }}</span></h5>
+            <h5 class="fw-bold text-dark mb-0">Order Details - <span class="order-status-text">{{ ucfirst($order->status) }}</span></h5>
             <span class="text-dark">Placed on {{ $order->order_date->format('Y-m-d H:i') }}</span>
         </div>
         <div class="card-body">
@@ -52,7 +52,10 @@
                 <div class="col-md-6">
                     <h6 class="fw-bold">Tracking Information:</h6>
                     <div class="status-timeline">
-                        <p>Status: <span class="badge rounded-pill {{ $order->status === 'pending' ? 'bg-warning' : ($order->status === 'delivering' ? 'bg-primary' : ($order->status === 'delivered' ? 'bg-success' : 'bg-danger')) }} order-status">{{ ucfirst($order->status) }}</span></p>
+                        <p>Status: <span class="order-status-text">{{ ucfirst($order->status) }}</span></p>
+                        <div class="progress mt-2">
+                            <div class="progress-bar" id="status-progress" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
                         @if($order->status !== 'delivered' && $order->status !== 'cancelled')
                             <p>Estimated Delivery: {{ $order->order_date->addMinutes(30)->format('Y-m-d H:i') }} (approx. 30 mins)</p>
                         @endif
@@ -77,6 +80,31 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .progress {
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+            border-radius: 10px;
+        }
+        .progress-bar[aria-valuenow="0"] {
+            background-color: #ff9800; /* Orange for Pending */
+        }
+        .progress-bar[aria-valuenow="50"] {
+            background-color: #007bff; /* Blue for Delivering */
+        }
+        .progress-bar[aria-valuenow="100"] {
+            background-color: #28a745; /* Green for Delivered */
+        }
+        .progress-bar[aria-valuenow="100"][data-status="cancelled"] {
+            background-color: #dc3545; /* Red for Cancelled */
+        }
+    </style>
 </div>
 
 @section('scripts')
@@ -85,30 +113,33 @@
             fetch('{{ url('/order') }}/' + orderId + '/status')
                 .then(response => response.json())
                 .then(data => {
-                    const statusElement = cardElement.querySelector('.order-status');
-                    const riderElement = cardElement.querySelector('.rider-info');
-                    const currentStatus = statusElement.textContent.toLowerCase();
+                    const statusTextElement = cardElement.querySelector('.order-status-text');
+                    const progressElement = cardElement.querySelector('#status-progress');
+                    const currentStatus = statusTextElement.textContent.toLowerCase();
 
-                    // Update status
+                    // Update status text
                     if (currentStatus !== data.status) {
-                        statusElement.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
-                        statusElement.classList.remove('bg-warning', 'bg-primary', 'bg-success', 'bg-danger');
-                        if (data.status === 'pending') {
-                            statusElement.classList.add('bg-warning');
-                        } else if (data.status === 'delivering') {
-                            statusElement.classList.add('bg-primary');
-                        } else if (data.status === 'delivered') {
-                            statusElement.classList.add('bg-success');
-                            const estDelivery = cardElement.querySelector('.status-timeline p:nth-child(2)');
-                            if (estDelivery) estDelivery.style.display = 'none';
-                        } else if (data.status === 'cancelled') {
-                            statusElement.classList.add('bg-danger');
-                            const estDelivery = cardElement.querySelector('.status-timeline p:nth-child(2)');
-                            if (estDelivery) estDelivery.style.display = 'none';
-                        }
+                        statusTextElement.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+                    }
+
+                    // Update progress bar
+                    let progress = 0;
+                    if (data.status === 'pending') progress = 0;
+                    else if (data.status === 'delivering') progress = 50;
+                    else if (data.status === 'delivered' || data.status === 'cancelled') progress = 100;
+
+                    progressElement.style.width = progress + '%';
+                    progressElement.setAttribute('aria-valuenow', progress);
+
+                    // Set data-status for Cancelled to apply red color
+                    if (data.status === 'cancelled') {
+                        progressElement.setAttribute('data-status', 'cancelled');
+                    } else {
+                        progressElement.removeAttribute('data-status');
                     }
 
                     // Update rider info
+                    const riderElement = cardElement.querySelector('.rider-info');
                     if (data.rider && riderElement) {
                         riderElement.textContent = `Rider: ${data.rider.name} (Phone: ${data.rider.phone})`;
                     }
@@ -126,6 +157,21 @@
 
             const orderCard = document.querySelector('.card');
             const orderId = {{ $order->id }};
+            const progressElement = orderCard.querySelector('#status-progress');
+
+            // Set initial progress based on current status
+            let initialProgress = 0;
+            if ('{{ $order->status }}' === 'pending') initialProgress = 0;
+            else if ('{{ $order->status }}' === 'delivering') initialProgress = 50;
+            else if ('{{ $order->status }}' === 'delivered' || '{{ $order->status }}' === 'cancelled') initialProgress = 100;
+            progressElement.style.width = initialProgress + '%';
+            progressElement.setAttribute('aria-valuenow', initialProgress);
+
+            // Set initial data-status for Cancelled
+            if ('{{ $order->status }}' === 'cancelled') {
+                progressElement.setAttribute('data-status', 'cancelled');
+            }
+
             setInterval(() => updateOrderStatus(orderId, orderCard), 10000);
             updateOrderStatus(orderId, orderCard);
         });

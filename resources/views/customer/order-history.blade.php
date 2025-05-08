@@ -49,7 +49,10 @@
                 @if ($order->rider)
                     <p><strong>Delivered by:</strong> {{ $order->rider->user->name ?? 'Not assigned' }} @if($order->rider->phone_number) (Phone: {{ $order->rider->phone_number }})@endif</p>
                 @endif
-                <p><strong>Status:</strong> <span class="badge rounded-pill {{ $order->status === 'pending' ? 'bg-warning' : ($order->status === 'delivering' ? 'bg-primary' : ($order->status === 'delivered' ? 'bg-success' : 'bg-danger')) }}">{{ ucfirst($order->status) }}</span></p>
+                <p><strong>Status:</strong> <span class="order-status-text">{{ ucfirst($order->status) }}</span></p>
+                <div class="progress mt-2">
+                    <div class="progress-bar" id="status-progress-{{ $order->id }}" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
                 <div class="text-end">
                     <a href="{{ route('order.view', $order->id) }}" class="btn btn-brown">View Order</a>
                 </div>
@@ -63,6 +66,31 @@
     @endforelse
 
     {{ $orders->links() }}
+
+    <style>
+        .progress {
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+            border-radius: 10px;
+        }
+        .progress-bar[aria-valuenow="0"] {
+            background-color: #ff9800; /* Orange for Pending */
+        }
+        .progress-bar[aria-valuenow="50"] {
+            background-color: #007bff; /* Blue for Delivering */
+        }
+        .progress-bar[aria-valuenow="100"] {
+            background-color: #28a745; /* Green for Delivered */
+        }
+        .progress-bar[aria-valuenow="100"][data-status="cancelled"] {
+            background-color: #dc3545; /* Red for Cancelled */
+        }
+    </style>
 </div>
 
 @section('scripts')
@@ -74,6 +102,22 @@
                     successAlert.classList.remove('show');
                 }, 3000);
             }
+
+            // Set initial progress for each order
+            @foreach($orders as $order)
+                const progressElement{{ $order->id }} = document.getElementById('status-progress-{{ $order->id }}');
+                let initialProgress{{ $order->id }} = 0;
+                if ('{{ $order->status }}' === 'pending') initialProgress{{ $order->id }} = 0;
+                else if ('{{ $order->status }}' === 'delivering') initialProgress{{ $order->id }} = 50;
+                else if ('{{ $order->status }}' === 'delivered' || '{{ $order->status }}' === 'cancelled') initialProgress{{ $order->id }} = 100;
+                progressElement{{ $order->id }}.style.width = initialProgress{{ $order->id }} + '%';
+                progressElement{{ $order->id }}.setAttribute('aria-valuenow', initialProgress{{ $order->id }});
+
+                // Set data-status for Cancelled to apply red color
+                if ('{{ $order->status }}' === 'cancelled') {
+                    progressElement{{ $order->id }}.setAttribute('data-status', 'cancelled');
+                }
+            @endforeach
         });
     </script>
 @endsection

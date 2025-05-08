@@ -28,7 +28,7 @@ class CheckRole
         if ($user->role !== $role) {
             $redirectRoute = match ($user->role) {
                 'admin' => 'admin.dashboard',
-                'customer' => 'cart',
+                'customer' => 'home',
                 'rider' => 'rider.index',
             };
 

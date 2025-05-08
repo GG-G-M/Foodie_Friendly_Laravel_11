@@ -51,7 +51,7 @@ class FoodSeeder extends Seeder
                 'description' => 'Grilled chicken breast with mayo, lettuce, and pickles.',
                 'price' => 9.50,
                 'category' => 'Burger',
-                'image' => 'food_images/chicken_burger.jpg',
+                'image' => 'food_images/chicken_burger.png',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

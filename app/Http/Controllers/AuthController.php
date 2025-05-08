@@ -26,22 +26,28 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required'
         ]);
-    
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            
-            $user = Auth::user();
-            $redirectRoute = match ($user->role) {
-                'admin' => 'admin.dashboard',
-                'customer' => 'cart',
-                'rider' => 'rider.index',
-                default => 'cart', // Default to cart for undefined roles
-            };
 
-            return redirect()->intended(route($redirectRoute));
+        $user = User::where('email', $credentials['email'])->first();
+
+        if ($user) {
+            if (Hash::check($credentials['password'], $user->password)) {
+                Auth::login($user);
+                $request->session()->regenerate();
+
+                $redirectRoute = match ($user->role) {
+                    'admin' => 'admin.dashboard',
+                    'customer' => 'home',
+                    'rider' => 'rider.index',
+                    default => 'cart', // Default to cart for undefined roles
+                };
+
+                return redirect()->intended(route($redirectRoute));
+            } else {
+                return back()->withErrors(['password' => 'The password is incorrect.'])->onlyInput('email');
+            }
+        } else {
+            return back()->withErrors(['email' => 'The email address is not registered.'])->onlyInput('email');
         }
-    
-        return back()->withErrors(['email' => 'Invalid credentials'])->onlyInput('email');
     }
 
     /**
@@ -65,7 +71,7 @@ class AuthController extends Controller
         ], [
             'password.confirmed' => 'The passwords do not match.',
         ]);
-    
+
         try {
             User::create([
                 'name' => $validated['name'],
@@ -73,7 +79,7 @@ class AuthController extends Controller
                 'password' => bcrypt($validated['password']),
                 'role' => $validated['role'],
             ]);
-    
+
             return redirect()->route('login')
                              ->with('success', 'Registration successful! Please log in.');
         } catch (\Exception $e) {
@@ -88,10 +94,10 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
-        
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
+
         return redirect()->route('login');
     }
 }
