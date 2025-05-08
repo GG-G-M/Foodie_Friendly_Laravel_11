@@ -32,7 +32,14 @@
                     <ul class="list-group mb-3">
                         @foreach($order->orderItems as $item)
                             <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #fffaf2;">
-                                <span>{{ $item->food->name }} (x{{ $item->quantity }})</span>
+                                <div class="d-flex align-items-center">
+                                    @if($item->food->image)
+                                        <img src="{{ asset('storage/' . $item->food->image) }}" alt="{{ $item->food->name }}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+                                    @else
+                                        <div style="width: 50px; height: 50px; background-color: #ddd; margin-right: 10px;"></div>
+                                    @endif
+                                    <span>{{ $item->food->name }} (x{{ $item->quantity }})</span>
+                                </div>
                                 <span>₱{{ number_format($item->price * $item->quantity, 2) }}</span>
                             </li>
                         @endforeach
@@ -50,7 +57,7 @@
                             <p>Estimated Delivery: {{ $order->order_date->addMinutes(30)->format('Y-m-d H:i') }} (approx. 30 mins)</p>
                         @endif
                         @if($order->rider)
-                            <p class="rider-info">Rider: {{ $order->rider->name }} (Phone: {{ $order->rider->phone }})</p>
+                            <p class="rider-info">Rider: {{ $order->rider->user->name ?? 'Not assigned' }} (Phone: {{ $order->rider->phone_number ?? 'N/A' }})</p>
                         @else
                             <p class="rider-info">Rider: Not assigned yet</p>
                         @endif

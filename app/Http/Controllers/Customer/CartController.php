@@ -118,7 +118,10 @@ class CartController extends Controller
 
     public function orders()
     {
-        $orders = Order::where('user_id', Auth::id())->with('orderItems.food')->latest()->paginate(10);
+        $orders = Order::where('user_id', Auth::id())
+            ->with('orderItems.food', 'rider.user') // Eager load rider and rider's user
+            ->latest()
+            ->paginate(10);
         return view('customer.order-history', compact('orders'));
     }
 
@@ -126,7 +129,7 @@ class CartController extends Controller
     {
         $order = Order::where('id', $id)
             ->where('user_id', Auth::id())
-            ->with('orderItems.food', 'rider')
+            ->with('orderItems.food', 'rider.user') // Eager load rider and rider's user
             ->firstOrFail();
         return view('customer.order-details', compact('order'));
     }
@@ -154,14 +157,14 @@ class CartController extends Controller
     {
         $order = Order::where('id', $id)
             ->where('user_id', Auth::id())
-            ->with('rider')
+            ->with('rider.user') // Eager load rider and rider's user
             ->firstOrFail();
 
         return response()->json([
             'status' => $order->status,
             'rider' => $order->rider ? [
-                'name' => $order->rider->name,
-                'phone' => $order->rider->phone,
+                'name' => $order->rider->user->name ?? 'Not assigned',
+                'phone' => $order->rider->phone_number ?? 'N/A',
             ] : null,
         ]);
     }

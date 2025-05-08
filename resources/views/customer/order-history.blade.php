@@ -24,7 +24,7 @@
     @forelse($orders as $order)
         <div class="card shadow-sm border-0 mb-4" style="background-color: #fefaf3;">
             <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #c8a879;">
-                <h5 class="fw-bold text-dark mb-0">Order #{{ $order->id }}</h5>
+                <h5 class="fw-bold text-dark mb-0">Order Details</h5>
                 <span class="text-dark">Placed on {{ $order->order_date->format('Y-m-d H:i') }}</span>
             </div>
             <div class="card-body">
@@ -32,13 +32,23 @@
                 <ul class="list-group mb-3">
                     @foreach($order->orderItems as $item)
                         <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #fffaf2;">
-                            <span>{{ $item->food->name }} (x{{ $item->quantity }})</span>
+                            <div class="d-flex align-items-center">
+                                @if($item->food->image)
+                                    <img src="{{ asset('storage/' . $item->food->image) }}" alt="{{ $item->food->name }}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+                                @else
+                                    <div style="width: 50px; height: 50px; background-color: #ddd; margin-right: 10px;"></div>
+                                @endif
+                                <span>{{ $item->food->name }} (x{{ $item->quantity }})</span>
+                            </div>
                             <span>₱{{ number_format($item->price * $item->quantity, 2) }}</span>
                         </li>
                     @endforeach
                 </ul>
                 <p><strong>Total Amount:</strong> ₱{{ number_format($order->total_amount, 2) }}</p>
                 <p><strong>Delivery Address:</strong> {{ $order->delivery_address }}</p>
+                @if ($order->rider)
+                    <p><strong>Delivered by:</strong> {{ $order->rider->user->name ?? 'Not assigned' }} @if($order->rider->phone_number) (Phone: {{ $order->rider->phone_number }})@endif</p>
+                @endif
                 <p><strong>Status:</strong> <span class="badge rounded-pill {{ $order->status === 'pending' ? 'bg-warning' : ($order->status === 'delivering' ? 'bg-primary' : ($order->status === 'delivered' ? 'bg-success' : 'bg-danger')) }}">{{ ucfirst($order->status) }}</span></p>
                 <div class="text-end">
                     <a href="{{ route('order.view', $order->id) }}" class="btn btn-brown">View Order</a>
