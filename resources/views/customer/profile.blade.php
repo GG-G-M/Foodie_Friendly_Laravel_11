@@ -16,18 +16,6 @@
                 
                 <!-- Card Body -->
                 <div class="card-body" style="background-color: #F5F5DC;">
-                    <!-- Profile Picture Section -->
-                    <!-- <div class="text-center mb-4">
-                        <div class="position-relative d-inline-block">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=A67B5B&color=fff&size=128" 
-                                 class="rounded-circle shadow border border-4 border-brown" 
-                                 style="border-color: #8B4513 !important; width: 128px; height: 128px; object-fit: cover;">
-                            <span class="position-absolute bottom-0 end-0 bg-brown rounded-circle p-2 border border-2 border-white">
-                                <i class="bi bi-pencil-fill text-white"></i>
-                            </span>
-                        </div>
-                    </div> -->
-
                     <!-- Profile Details -->
                     <div class="row g-3">
                         <!-- Name Field -->
@@ -77,10 +65,12 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex justify-content-between mt-4 pt-3 border-top border-brown">
-                        
-                        <button class="btn btn-brown">
+                        <a href="{{ route('profile.edit') }}" class="btn btn-brown">
                             <i class="bi bi-pencil-fill me-2"></i>Edit Profile
-                        </button>
+                        </a>
+                        <a href="{{ route('profile.change-password') }}" class="btn btn-brown">
+                            <i class="bi bi-lock-fill me-2"></i>Change Password
+                        </a>
                     </div>
                 </div>
             </div>
