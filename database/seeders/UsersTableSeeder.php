@@ -12,115 +12,57 @@ class UsersTableSeeder extends Seeder
     {
         $customers = [
             [
-                'name' => 'Customer User',
-                'email' => 'customer@gmail.com',
-                'password' => '123',
+                'name' => 'Customer One',
+                'email' => 'customer1@gmail.com',
+                'password' => Hash::make('123'),
                 'role' => 'customer',
             ],
             [
-                'name' => 'John Doe',
-                'email' => 'john@example.com',
-                'password' => '123',
+                'name' => 'Customer Two',
+                'email' => 'customer2@gmail.com',
+                'password' => Hash::make('123'),
                 'role' => 'customer',
             ],
             [
-                'name' => 'Jane Smith',
-                'email' => 'jane.smith@example.com',
-                'password' => '123',
+                'name' => 'Customer Three',
+                'email' => 'customer3@gmail.com',
+                'password' => Hash::make('123'),
                 'role' => 'customer',
             ],
             [
-                'name' => 'Michael Johnson',
-                'email' => 'michael.j@example.com',
-                'password' => '123',
+                'name' => 'Customer Four',
+                'email' => 'customer4@gmail.com',
+                'password' => Hash::make('123'),
                 'role' => 'customer',
             ],
             [
-                'name' => 'Emily Williams',
-                'email' => 'emily.w@example.com',
-                'password' => '123',
+                'name' => 'Customer Five',
+                'email' => 'customer5@gmail.com',
+                'password' => Hash::make('123'),
                 'role' => 'customer',
             ],
             [
-                'name' => 'Robert Brown',
-                'email' => 'robert.b@example.com',
-                'password' => '123',
-                'role' => 'customer',
-            ],
-            [
-                'name' => 'Sarah Davis',
-                'email' => 'sarah.d@example.com',
-                'password' => '123',
-                'role' => 'customer',
-            ],
-            [
-                'name' => 'David Miller',
-                'email' => 'david.m@example.com',
-                'password' => '123',
-                'role' => 'customer',
-            ],
-            [
-                'name' => 'Jessica Wilson',
-                'email' => 'jessica.w@example.com',
-                'password' => '123',
-                'role' => 'customer',
-            ],
-            [
-                'name' => 'Thomas Moore',
-                'email' => 'thomas.m@example.com',
-                'password' => '123',
-                'role' => 'customer',
-            ],
-            [
-                'name' => 'Lisa Taylor',
-                'email' => 'lisa.t@example.com',
-                'password' => '123',
-                'role' => 'customer',
-            ],
-            [
-                'name' => 'Daniel Anderson',
-                'email' => 'daniel.a@example.com',
-                'password' => '123',
-                'role' => 'customer',
-            ],
-            [
-                'name' => 'Megan Thomas',
-                'email' => 'megan.t@example.com',
-                'password' => '123',
-                'role' => 'customer',
-            ],
-            [
-                'name' => 'Christopher Lee',
-                'email' => 'chris.lee@example.com',
-                'password' => '123',
-                'role' => 'customer',
-            ],
-            [
-                'name' => 'Amanda Harris',
-                'email' => 'amanda.h@example.com',
-                'password' => '123',
-                'role' => 'customer',
-            ],
-            [
-                'name' => 'Kevin Martin',
-                'email' => 'kevin.m@example.com',
-                'password' => '123',
+                'name' => 'Customer Six',
+                'email' => 'customer6@gmail.com',
+                'password' => Hash::make('123'),
                 'role' => 'customer',
             ],
         ];
 
         foreach ($customers as $customer) {
             User::firstOrCreate(
-                ['email' => $customer['email']], // Check if email exists
+                ['email' => $customer['email']],
                 [
                     'name' => $customer['name'],
-                    'password' => Hash::make($customer['password']),
+                    'password' => $customer['password'],
                     'role' => $customer['role'],
+                    'email_verified_at' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]
             );
         }
 
         $this->command->info('User seeded successfully!');
-
     }
 }

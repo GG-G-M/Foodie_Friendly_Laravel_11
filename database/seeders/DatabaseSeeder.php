@@ -47,10 +47,11 @@ class DatabaseSeeder extends Seeder
             FoodSeeder::class
         ]);
 
-        // Seed Order for customer
+         // Seed Rider
         $this->call([
-            OrderSeeder::class
+            RiderSeeder::class
         ]);
+
     
         $this->command->info('Default database seeded successfully!');
     }
