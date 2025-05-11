@@ -101,7 +101,9 @@
                 <h5 class="fw-bold text-dark mb-0" style="font-size: 1.5rem;"><i class="bi bi-list-ul me-1"></i> Available Orders</h5>
                 <form action="{{ route('logout') }}" method="POST" class="d-inline">
                     @csrf
-                    
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="bi bi-box-arrow-right me-1"></i> Logout
+                    </button>
                 </form>
             </div>
             <div class="card-body">
