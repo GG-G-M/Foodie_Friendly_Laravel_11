@@ -135,7 +135,7 @@
 
         <div class="mt-3">
             <a href="{{ route('login') }}" class="btn btn-custom">
-                Go to Login 
+                Go Back
             </a>
         </div>
 

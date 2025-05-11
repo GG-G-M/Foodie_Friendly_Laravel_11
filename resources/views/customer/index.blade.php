@@ -4,7 +4,14 @@
 
 @section('content')
 <div class="container mt-4">
-    <h1 class="mb-4">Food Menu</h1>
+
+    <!-- Header + View Cart button aligned -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Food Menu</h1>
+        <a href="{{ route('cart') }}" class="btn btn-brown">
+            <i class="bi bi-cart4 me-1"></i> View Cart
+        </a>
+    </div>
 
     <!-- Success/Error Messages -->
     @if (session('success'))
@@ -20,6 +27,7 @@
         </div>
     @endif
 
+    <!-- Food Items -->
     <div class="row">
         @foreach ($foods as $food)
             <div class="col-md-4 mb-4">
@@ -42,19 +50,18 @@
             </div>
         @endforeach
     </div>
-    <a href="{{ route('cart') }}" class="btn btn-brown">View Cart</a>
 </div>
+@endsection
 
 @section('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const successAlert = document.getElementById('success-alert');
-            if (successAlert) {
-                setTimeout(() => {
-                    successAlert.classList.remove('show');
-                }, 3000);
-            }
-        });
-    </script>
-@endsection
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const successAlert = document.getElementById('success-alert');
+        if (successAlert) {
+            setTimeout(() => {
+                successAlert.classList.remove('show');
+            }, 3000);
+        }
+    });
+</script>
 @endsection

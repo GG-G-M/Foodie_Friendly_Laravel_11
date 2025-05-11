@@ -61,6 +61,17 @@
                                 </label>
                             </div>
                         </div>
+
+                        <!-- Phone Number Field -->
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control bg-light-brown border-brown" id="phone" 
+                                       value="{{ $user->phone ?? '' }}" readonly>
+                                <label for="phone" class="text-brown">
+                                    <i class="bi bi-telephone-fill me-2"></i>Phone Number
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Action Buttons -->

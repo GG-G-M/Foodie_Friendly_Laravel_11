@@ -22,6 +22,7 @@
                         <input type="email" class="form-control" id="email" name="email" value="{{ $user->email }}" required>
                     </div>
 
+
                     <div class="form-group">
                         <label for="password">Password (Leave blank to keep current password)</label>
                         <input type="password" class="form-control" id="password" name="password">
@@ -42,3 +43,4 @@
         </div>
     </div>
 @endsection
+    

@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\RiderController;
 use App\Http\Controllers\Rider\RiderDashboardController;
+
 use App\Http\Middleware\CheckRole;
 
 /*
@@ -126,6 +127,12 @@ Route::middleware(['auth', CheckRole::class . ':rider'])->prefix('rider')->name(
     Route::get('/dashboard', [RiderDashboardController::class, 'index'])->name('index');
     Route::post('/start-delivery/{order}', [RiderDashboardController::class, 'startDelivery'])->name('startDelivery');
     Route::post('/finish-delivery/{order}', [RiderDashboardController::class, 'finishDelivery'])->name('finishDelivery');
+
+    // ✅ Add this profile route here
+  Route::get('/profile', function () {
+    return view('rider.profile');  // Laravel will look for resources/views/rider/profile.blade.php
+})->name('profile');
+
 });
 
 /*
