@@ -23,8 +23,10 @@ class SalesController extends Controller
             ->with('orderItems.food')
             ->get();
 
-        // Calculate total sales
-        $totalSales = $orders->sum('total_amount');
+        // Calculate total sales (subtotal + delivery_fee)
+        $totalSales = $orders->sum(function ($order) {
+            return $order->total_amount + ($order->delivery_fee ?? 0.00);
+        });
 
         // Calculate total orders
         $totalOrders = $orders->count();
@@ -53,19 +55,28 @@ class SalesController extends Controller
             $weeklySales['labels'][] = $date->format('M d');
             $dailySales = Order::whereDate('order_date', $date)
                 ->where('status', 'delivered')
-                ->sum('total_amount');
-            $weeklySales['data'][] = $dailySales;
+                ->get()
+                ->sum(function ($order) {
+                    return $order->total_amount + ($order->delivery_fee ?? 0.00);
+                });
+            $weeklySales['data'][] = (float) $dailySales; // Ensure numeric values for Chart.js
         }
 
-        // Sales by category (mock data for simplicity; replace with actual categories if available)
-        $categories = [
-            ['name' => 'Main Course', 'sales' => 0, 'color' => '#FF6384'],
-            ['name' => 'Drinks', 'sales' => 0, 'color' => '#36A2EB'],
-            ['name' => 'Desserts', 'sales' => 0, 'color' => '#FFCE56']
-        ];
+        // Sales by category (dynamically fetched from food table)
+        $uniqueCategories = Food::select('category')->distinct()->pluck('category')->map(function ($cat) {
+            return $cat ?? 'Uncategorized';
+        })->all();
+        $categories = [];
+        foreach ($uniqueCategories as $cat) {
+            $categories[] = [
+                'name' => $cat,
+                'sales' => 0,
+                'color' => '#' . str_pad(dechex(mt_rand(0, 0xFFFFFF)), 6, '0', STR_PAD_LEFT)
+            ];
+        }
         foreach ($orders as $order) {
             foreach ($order->orderItems as $item) {
-                $category = $item->food->category ?? 'Main Course';
+                $category = $item->food->category ?? 'Uncategorized';
                 $price = $item->price * $item->quantity;
                 foreach ($categories as &$cat) {
                     if ($cat['name'] === $category) {
@@ -74,6 +85,11 @@ class SalesController extends Controller
                 }
             }
         }
+        // Ensure sales values are numeric for Chart.js
+        $categories = array_map(function ($cat) {
+            $cat['sales'] = (float) $cat['sales'];
+            return $cat;
+        }, $categories);
 
         // Recent orders (take the latest 3)
         $recentOrders = Order::whereBetween('order_date', [$startDate, $endDate])

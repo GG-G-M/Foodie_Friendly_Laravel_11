@@ -106,7 +106,7 @@ Route::middleware(['auth', CheckRole::class . ':admin'])->group(function () {
     Route::delete('/foods/{food}', [FoodController::class, 'destroy'])->name('foods.destroy');
 
     // Order Menu (Admin Order Management)
-    Route::get('/order-menu', [AdminController::class, 'orderMenu'])->name('admin.order_menu');
+    Route::get('/order-menu', [OrderController::class, 'index'])->name('admin.order_menu');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('admin.orders.create');
     Route::post('/orders', [OrderController::class, 'store'])->name('admin.orders.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('admin.orders.show');
@@ -121,7 +121,7 @@ Route::middleware(['auth', CheckRole::class . ':admin'])->group(function () {
     Route::post('/set-delivery-fee', [OrderController::class, 'updateDeliveryFee'])->name('admin.update_delivery_fee');
 
     // Sales Report Routes
-    Route::get('/sales-report', [SalesController::class, 'index'])->name('admin.sales_report');
+    Route::get('/sales-report', [SalesController::class, 'index'])->name('admin.sales_report.index');
     Route::post('/sales-report/filter', [SalesController::class, 'filter'])->name('admin.sales_report.filter');
 });
 

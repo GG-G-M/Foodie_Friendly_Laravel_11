@@ -3,6 +3,9 @@
 @section('title', 'Sales Report')
 
 @section('content')
+<!-- Font Awesome CDN for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
 <div class="container py-4" style="background-color: #f4ece3; border-radius: 15px;">
     <h2 class="mb-4 text-center" style="color: #5D3A00;"><i class="fas fa-chart-bar me-2"></i> Sales Report</h2>
 
@@ -96,7 +99,7 @@
             <div class="card shadow-sm h-100" style="background-color: #fff7f0;">
                 <div class="card-body">
                     <h6 style="color: #5D3A00;">Weekly Sales Trend</h6>
-                    <div style="height: 200px;">
+                    <div style="height: 300px;">
                         <canvas id="weeklyChart"></canvas>
                     </div>
                 </div>
@@ -106,7 +109,7 @@
             <div class="card shadow-sm h-100" style="background-color: #fff7f0;">
                 <div class="card-body">
                     <h6 style="color: #5D3A00;">Sales by Category</h6>
-                    <div style="height: 200px;">
+                    <div style="height: 300px;">
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
@@ -122,6 +125,9 @@
                 <p class="text-center">No recent orders available.</p>
             @else
                 @foreach($recentOrders as $order)
+                    @php
+                        $totalAmount = $order->total_amount + ($order->delivery_fee ?? 0.00);
+                    @endphp
                     <div class="d-flex mb-3 p-3 rounded bg-light shadow-sm">
                         <div class="me-3">
                             <span class="badge" style="background-color: #d2b48c; color: white; font-size: 1.25rem;">#{{ $order->id }}</span>
@@ -132,7 +138,7 @@
                                     {{ $item->quantity }} {{ $item->food->name }}{{ $loop->last ? '' : ', ' }}
                                 @endforeach
                             </div>
-                            <div class="text-muted">Total: ₱{{ number_format($order->total_amount, 2) }}</div>
+                            <div class="text-muted">Total: ₱{{ number_format($totalAmount, 2) }}</div>
                         </div>
                         <div>
                             <span class="badge {{ $order->status === 'delivered' ? 'bg-success' : 'bg-warning' }}">
@@ -146,55 +152,87 @@
     </div>
 </div>
 
-@section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
-    // Weekly Chart
-    new Chart(document.getElementById('weeklyChart'), {
+    // Debug: Log the data to ensure it's being passed correctly
+    console.log('Weekly Sales Data:', @json($weeklySales));
+    console.log('Categories Data:', @json($categories));
+
+    // Weekly Sales Trend (Bar Graph)
+    const weeklyChartCtx = document.getElementById('weeklyChart').getContext('2d');
+    new Chart(weeklyChartCtx, {
         type: 'bar',
         data: {
             labels: @json($weeklySales['labels']),
             datasets: [{
+                label: 'Sales',
                 data: @json($weeklySales['data']),
-                backgroundColor: '#36A2EB',
-                borderColor: '#228BCC',
+                backgroundColor: '#d2b48c',
+                borderColor: '#a97c50',
                 borderWidth: 1
             }]
         },
         options: {
+            responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '₱' + context.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        }
+                    }
+                }
+            },
             scales: {
-                y: { 
+                y: {
                     beginAtZero: true,
-                    ticks: { callback: v => '₱'+v }
+                    ticks: {
+                        callback: function(value) {
+                            return '₱' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        }
+                    }
                 }
             }
         }
     });
 
-    // Category Chart
-    new Chart(document.getElementById('categoryChart'), {
-        type: 'doughnut',
+    // Sales by Category (Pie Chart)
+    const categoryChartCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(categoryChartCtx, {
+        type: 'pie',
         data: {
             labels: @json(collect($categories)->pluck('name')),
             datasets: [{
+                label: 'Sales by Category',
                 data: @json(collect($categories)->pluck('sales')),
-                backgroundColor: @json(collect($categories)->pluck('color'))
+                backgroundColor: @json(collect($categories)->pluck('color')),
+                borderWidth: 1
             }]
         },
         options: {
+            responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: 'right' },
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 20,
+                        padding: 15
+                    }
+                },
                 tooltip: {
                     callbacks: {
-                        label: ctx => `${ctx.label}: ₱${ctx.raw}`
+                        label: function(context) {
+                            return `${context.label}: ₱${context.raw.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                        }
                     }
                 }
             }
         }
     });
 </script>
-@endsection
+@endpush
 @endsection

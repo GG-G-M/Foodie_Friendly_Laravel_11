@@ -25,7 +25,7 @@
         <a class="nav-link {{ request()->routeIs('admin.order_menu') ? 'active' : '' }}" href="{{ route('admin.order_menu') }}">
             <i class="fas fa-clipboard-list"></i> Order Menu
         </a>
-        <a class="nav-link {{ request()->routeIs('admin.sales_report') ? 'active' : '' }}" href="{{ route('admin.sales_report') }}">
+        <a class="nav-link {{ request()->routeIs('admin.sales_report.index') ? 'active' : '' }}" href="{{ route('admin.sales_report.index') }}">
             <i class="fas fa-chart-bar"></i> Sales Report
         </a>
 
