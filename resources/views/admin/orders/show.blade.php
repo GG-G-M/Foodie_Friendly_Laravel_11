@@ -28,8 +28,20 @@
             <div class="row">
                 <div class="col-md-6">
                     <p><strong>Customer:</strong> {{ $order->user->name }}</p>
-                    <p><strong>Total Amount:</strong> ₱{{ number_format($order->total_amount, 2) }}</p>
                     <p><strong>Delivery Address:</strong> {{ $order->delivery_address ?? 'Not specified' }}</p>
+                    <p><strong>Payment Method:</strong> {{ $order->payment_method ?? 'Not specified' }}</p>
+                    <p><strong>Delivery Fee:</strong> ₱{{ number_format($order->delivery_fee ?? 0.00, 2) }}</p>
+                    @php
+                        $subtotal = $order->orderItems->sum(function ($item) {
+                            return $item->price * $item->quantity;
+                        });
+                        $totalAmount = $subtotal + ($order->delivery_fee ?? 0.00);
+                    @endphp
+                    <p><strong>Total Amount:</strong> ₱{{ number_format($totalAmount, 2) }}
+                        @if($order->payment_method === 'GCash' || $order->payment_method === 'PayMaya' || ($order->payment_method === 'Cash on Delivery' && $order->status === 'delivered'))
+                            <span class="badge badge-paid" style="background-color: #28a745; color: #fff; margin-left: 5px;">Paid</span>
+                        @endif
+                    </p>
                     <p><strong>Status:</strong>
                         <span class="badge 
                             @if($order->status === 'pending') badge-pending
@@ -43,7 +55,7 @@
                 </div>
                 <div class="col-md-6">
                     @if($order->rider)
-                        <p><strong>Rider:</strong> {{ $order->rider->name }}</p>
+                        <p><strong>Rider:</strong> {{ $order->rider->user->name }}</p>
                     @else
                         <p><strong>Rider:</strong> Not assigned</p>
                     @endif
@@ -72,6 +84,18 @@
                                 <td>₱{{ number_format($item->price * $item->quantity, 2) }}</td>
                             </tr>
                         @endforeach
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold">Subtotal:</td>
+                            <td>₱{{ number_format($subtotal, 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold">Delivery Fee:</td>
+                            <td>₱{{ number_format($order->delivery_fee ?? 0.00, 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold">Total:</td>
+                            <td>₱{{ number_format($totalAmount, 2) }}</td>
+                        </tr>
                     </tbody>
                 </table>
             @endif
@@ -104,6 +128,13 @@
     .badge-cancelled {
         background-color: #dc3545;
         color: #fff;
+    }
+
+    .badge-paid {
+        background-color: #28a745;
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 5px;
     }
 
     body {

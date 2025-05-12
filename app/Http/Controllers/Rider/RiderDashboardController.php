@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\Rider;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,81 +12,130 @@ class RiderDashboardController extends Controller
 {
     public function index()
     {
-        $rider = Rider::where('user_id', Auth::id())->first();
+        $rider = Auth::user()->rider;
 
-        if (!$rider) {
-            return redirect()->route('rider.index')->with('error', 'Rider profile not found. Please contact the admin.');
-        }
-
+        // Current Order
         $currentOrder = Order::where('rider_id', $rider->id)
-            ->where('status', 'delivering')
-            ->with('orderItems.food', 'user')
-            ->first();
+                             ->where('status', 'delivering')
+                             ->with('orderItems.food')
+                             ->first();
 
-        if ($currentOrder) {
-            $subtotal = $currentOrder->orderItems->sum(fn($item) => $item->price * $item->quantity);
-            $deliveryFee = 50;
-            $tax = $subtotal * 0.1;
-            $currentOrder->display_total = ($currentOrder->payment_method === 'Cash on Delivery') ? ($subtotal + $deliveryFee + $tax) : 0;
-        }
+        // Total Deliveries
+        $totalDeliveries = Order::where('rider_id', $rider->id)
+                                ->where('status', 'delivered')
+                                ->count();
 
-        $pendingOrders = Order::whereNull('rider_id')
-            ->where('status', 'pending')
-            ->with('user', 'orderItems')
-            ->get()
-            ->map(function ($order) {
-                $subtotal = $order->orderItems->sum(fn($item) => $item->price * $item->quantity);
-                $deliveryFee = 50;
-                $tax = $subtotal * 0.1;
-                $order->display_total = ($order->payment_method === 'Cash on Delivery') ? ($subtotal + $deliveryFee + $tax) : 0;
-                return $order;
-            });
+        // Total Earnings
+        $deliveredOrders = Order::where('rider_id', $rider->id)
+                                ->where('status', 'delivered')
+                                ->get();
+        $totalEarnings = $deliveredOrders->sum(function ($order) {
+            return $order->payment_method === 'Cash on Delivery' ? Setting::where('key', 'delivery_fee')->value('value') : 0;
+        });
 
-        return view('rider.index', compact('currentOrder', 'pendingOrders'));
+        // Calculate total for current order
+        $currentOrderTotal = $currentOrder ? $this->calculateOrderTotal($currentOrder) : 0;
+
+        return view('rider.index', compact('currentOrder', 'totalDeliveries', 'totalEarnings', 'currentOrderTotal'));
+    }
+
+    protected function calculateOrderTotal($order)
+    {
+        $subtotal = $order->orderItems->sum(fn($item) => $item->price * $item->quantity);
+        $deliveryFee = $order->payment_method === 'Cash on Delivery' ? Setting::where('key', 'delivery_fee')->value('value') : 0;
+        // Removed VAT (tax) calculation
+        return $subtotal + $deliveryFee;
+    }
+
+    public function orders()
+    {
+        $rider = Auth::user()->rider;
+        $currentOrder = Order::where('rider_id', $rider->id)
+                             ->where('status', 'delivering')
+                             ->with('orderItems.food')
+                             ->first();
+
+        $pendingOrders = Order::where('status', 'pending')
+                              ->whereNull('rider_id')
+                              ->with('orderItems.food')
+                              ->get();
+
+        // Calculate totals for pending orders
+        $pendingOrderTotals = $pendingOrders->mapWithKeys(function ($order) {
+            return [$order->id => $this->calculateOrderTotal($order)];
+        })->toArray();
+
+        $currentOrderTotal = $currentOrder ? $this->calculateOrderTotal($currentOrder) : 0;
+
+        return view('rider.orders', compact('pendingOrders', 'currentOrder', 'pendingOrderTotals', 'currentOrderTotal'));
+    }
+
+    public function myDeliveries()
+    {
+        $rider = Auth::user()->rider;
+        $deliveredOrders = Order::where('rider_id', $rider->id)
+                                ->whereIn('status', ['delivered', 'cancelled'])
+                                ->orderBy('updated_at', 'desc')
+                                ->with('orderItems.food')
+                                ->get();
+
+        return view('rider.my-deliveries', compact('deliveredOrders'));
+    }
+
+    public function earnings()
+    {
+        $rider = Auth::user()->rider;
+        $deliveredOrders = Order::where('rider_id', $rider->id)
+                                ->where('status', 'delivered')
+                                ->with('orderItems.food')
+                                ->get();
+
+        $totalEarnings = $deliveredOrders->sum(function ($order) {
+            return $order->payment_method === 'Cash on Delivery' ? Setting::where('key', 'delivery_fee')->value('value') : 0;
+        });
+
+        return view('rider.earnings', compact('deliveredOrders', 'totalEarnings'));
+    }
+
+    public function profile()
+    {
+        return view('rider.profile');
     }
 
     public function startDelivery(Request $request, Order $order)
     {
-        if ($order->rider_id || $order->status !== 'pending') {
-            return redirect()->route('rider.index')->with('error', 'Order is no longer available.');
+        if ($order->status !== 'pending' || $order->rider_id) {
+            return redirect()->route('rider.orders')->with('error', 'This order is already taken or not available.');
         }
 
-        $rider = Rider::where('user_id', Auth::id())->first();
-
-        if (!$rider) {
-            return redirect()->route('rider.index')->with('error', 'Rider profile not found. Please contact the admin.');
-        }
+        $rider = Auth::user()->rider;
 
         $currentOrder = Order::where('rider_id', $rider->id)
-            ->where('status', 'delivering')
-            ->exists();
+                            ->where('status', 'delivering')
+                            ->first();
 
         if ($currentOrder) {
-            return redirect()->route('rider.index')->with('error', 'You are already handling an order. Complete it first.');
+            return redirect()->route('rider.orders')->with('error', 'You are already handling an order. Please complete it first.');
         }
 
         $order->update([
             'rider_id' => $rider->id,
             'status' => 'delivering',
-            'delivery_started_at' => now(),
         ]);
 
-        return redirect()->route('rider.index')->with('success', 'Order #' . $order->id . ' delivery started.');
+        return redirect()->route('rider.orders')->with('success', 'Order delivery started successfully!');
     }
 
     public function finishDelivery(Request $request, Order $order)
     {
-        $rider = Rider::where('user_id', Auth::id())->first();
-
-        if (!$rider || $order->rider_id != $rider->id || $order->status !== 'delivering') {
-            return redirect()->route('rider.index')->with('error', 'Invalid order or status.');
+        if ($order->status !== 'delivering' || $order->rider_id !== Auth::user()->rider->id) {
+            return redirect()->route('rider.index')->with('error', 'You cannot finish this order.');
         }
 
         $order->update([
             'status' => 'delivered',
-            'delivery_completed_at' => now(),
         ]);
 
-        return redirect()->route('rider.index')->with('success', 'Order #' . $order->id . ' marked as delivered.');
+        return redirect()->route('rider.index')->with('success', 'Order delivered successfully!');
     }
 }

@@ -17,16 +17,18 @@
     @if(session('error'))
         <div class="alert alert-danger">
             {{ session('error') }}
-        </div>
-    @endif
+        @endif
 
     <div class="card shadow-sm" style="background-color: #fff7f0;">
         <div class="card-header fw-bold" style="background-color: #d2b48c; color: #3e2600;">
             📋 Order List
         </div>
         <div class="card-body">
-            <a href="{{ route('admin.orders.create') }}" class="btn btn-success mb-3">
+            <a href="{{ route('admin.orders.create') }}" class="btn btn-success mb-3 me-2">
                 <i class="bi bi-plus-circle"></i> Create Order
+            </a>
+            <a href="{{ route('admin.set_delivery_fee') }}" class="btn btn-info mb-3">
+                <i class="bi bi-gear"></i> Set Delivery Fee
             </a>
             @if($orders->isEmpty())
                 <p class="text-center">No orders available.</p>
@@ -37,6 +39,7 @@
                             <th>#</th>
                             <th>Customer</th>
                             <th>Total</th>
+                            <th>Delivery Fee</th>
                             <th>Status</th>
                             <th>Ordered At</th>
                             <th>Actions</th>
@@ -44,10 +47,19 @@
                     </thead>
                     <tbody>
                         @foreach($orders as $order)
+                            @php
+                                $totalAmount = $order->total_amount + ($order->delivery_fee ?? 0.00);
+                            @endphp
                             <tr>
                                 <td>{{ $order->id }}</td>
                                 <td>{{ $order->user->name }}</td>
-                                <td>₱{{ number_format($order->total_amount, 2) }}</td>
+                                <td>
+                                    ₱{{ number_format($totalAmount, 2) }}
+                                    @if($order->payment_method === 'GCash' || $order->payment_method === 'PayMaya' || ($order->payment_method === 'Cash on Delivery' && $order->status === 'delivered'))
+                                        <span class="badge badge-paid" style="background-color: #28a745; color: #fff; margin-left: 5px;">Paid</span>
+                                    @endif
+                                </td>
+                                <td>₱{{ number_format($order->delivery_fee ?? 0.00, 2) }}</td>
                                 <td>
                                     <span class="badge 
                                         @if($order->status === 'pending') badge-pending
@@ -117,6 +129,13 @@
     .badge-cancelled {
         background-color: #dc3545;
         color: #fff;
+    }
+
+    .badge-paid {
+        background-color: #28a745;
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 5px;
     }
 
     form {

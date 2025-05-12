@@ -52,6 +52,12 @@ class DatabaseSeeder extends Seeder
             RiderSeeder::class
         ]);
 
+        // Seed Orders
+        $this->call([
+            OrderTableSeeder::class
+        ]);
+        
+
     
         $this->command->info('Default database seeded successfully!');
     }

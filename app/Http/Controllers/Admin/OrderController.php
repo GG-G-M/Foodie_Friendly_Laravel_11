@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\User;
 use App\Models\Food;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -29,34 +30,48 @@ class OrderController extends Controller
         $request->validate([
             'customer_id' => 'required|exists:users,id',
             'delivery_address' => 'required|string|max:255',
+            'payment_method' => 'required|string|in:Cash on Delivery,GCash,PayMaya',
             'items' => 'required|array|min:1',
             'items.*.food_id' => 'required|exists:foods,id',
             'items.*.quantity' => 'required|integer|min:1',
         ]);
 
-        // Calculate total amount
-        $totalAmount = 0;
+        // Fetch the delivery fee
+        $deliveryFeeRecord = DB::table('delivery_fees')
+            ->orderBy('date_added', 'desc')
+            ->first();
+        $deliveryFee = $deliveryFeeRecord ? $deliveryFeeRecord->fee : 50.00;
+
+        // Calculate subtotal
+        $subTotal = 0;
         foreach ($request->items as $item) {
             $food = Food::find($item['food_id']);
-            $totalAmount += $food->price * $item['quantity'];
+            if (!$food) {
+                return redirect()->back()->with('error', 'Invalid food item selected.');
+            }
+            $subTotal += $food->price * $item['quantity'];
         }
 
-        // Create the order
+        // Create the order with subtotal as total_amount
         $order = Order::create([
             'user_id' => $request->customer_id,
-            'total_amount' => $totalAmount,
+            'total_amount' => $subTotal, // Store subtotal initially
             'delivery_address' => $request->delivery_address,
+            'payment_method' => $request->payment_method,
+            'delivery_fee' => $deliveryFee,
             'status' => 'pending',
+            'payment_status' => 'pending',
             'order_date' => now(),
         ]);
 
         // Create order items
         foreach ($request->items as $item) {
+            $food = Food::find($item['food_id']);
             OrderItem::create([
                 'order_id' => $order->id,
                 'food_id' => $item['food_id'],
                 'quantity' => $item['quantity'],
-                'price' => Food::find($item['food_id'])->price,
+                'price' => $food->price,
             ]);
         }
 
@@ -65,7 +80,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load('user', 'rider', 'orderItems.food'); // Eager-load relationships
+        $order->load('user', 'rider', 'orderItems.food');
         return view('admin.orders.show', compact('order'));
     }
 
@@ -101,5 +116,29 @@ class OrderController extends Controller
 
         $order->update(['status' => $request->status]);
         return redirect()->route('admin.order_menu')->with('success', 'Order status updated successfully.');
+    }
+
+    public function setDeliveryFee()
+    {
+        $currentDeliveryFee = DB::table('delivery_fees')
+            ->orderBy('date_added', 'desc')
+            ->first()->fee ?? 50.00;
+        return view('admin.set_delivery_fee', compact('currentDeliveryFee'));
+    }
+
+    public function updateDeliveryFee(Request $request)
+    {
+        $request->validate([
+            'delivery_fee' => 'required|numeric|min:0|max:999.99'
+        ]);
+
+        DB::table('delivery_fees')->insert([
+            'fee' => $request->delivery_fee,
+            'date_added' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('admin.order_menu')->with('success', 'Delivery fee updated successfully!');
     }
 }

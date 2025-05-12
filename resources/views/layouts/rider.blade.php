@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rider Dashboard</title>
+    <title>@yield('title', 'Rider Dashboard')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
         body {
@@ -62,12 +63,17 @@
     <!-- Sidebar -->
     <div class="side-navbar">
         <h4 class="text-white">Rider Panel</h4>
-        <a href="#">Dashboard</a>
-        <a href="#">Available Orders</a>
-        <a href="#">My Deliveries</a>
-        <a href="#">Earnings</a>
-        <a href="#">Profile</a>
-        <a href="#">Logout</a>
+        <a href="{{ route('rider.index') }}"><i class="bi bi-house-door me-2"></i>Dashboard</a>
+        <a href="{{ route('rider.orders') }}"><i class="bi bi-list-ul me-2"></i>Orders</a>
+        <a href="{{ route('rider.my-deliveries') }}"><i class="bi bi-truck me-2"></i>My Deliveries</a>
+        <a href="{{ route('rider.earnings') }}"><i class="bi bi-wallet2 me-2"></i>Earnings</a>
+        <a href="{{ route('rider.profile') }}"><i class="bi bi-person-circle me-2"></i>Profile</a>
+        <form action="{{ route('logout') }}" method="POST" class="d-inline">
+            @csrf
+            <button type="submit" class="btn text-white w-100 text-start" style="padding: 10px; border-radius: 5px;">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </button>
+        </form>
     </div>
 
     <!-- Main Content -->

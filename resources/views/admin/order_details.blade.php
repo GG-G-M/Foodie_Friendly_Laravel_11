@@ -1,4 +1,4 @@
-@extends('layouts.welcome_admin')
+{{-- @extends('layouts.welcome_admin')
 
 @section('content')
 <div class="container py-4">
@@ -155,4 +155,4 @@
         margin-right: 4px;
     }
 </style>
-@endsection
+@endsection --}}

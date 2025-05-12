@@ -16,9 +16,7 @@
         @endif
 
         @if ($errors->any())
-            @foreach ($errors->all() as $error)
-                <p class="text-danger text-center">{{ $error }}</p>
-            @endforeach
+            <p class="text-danger text-center">{{ $errors->first() }}</p>
         @endif
 
         <form method="POST" action="{{ route('login') }}">
@@ -26,18 +24,12 @@
     
             <div class="mb-3">
                 <label class="form-label text-white">Email</label>
-                <input type="email" name="email" class="form-control bg-dark text-white border-0 @error('email') is-invalid @enderror" 
+                <input type="email" name="email" class="form-control bg-dark text-white border-0" 
                        value="{{ old('email') }}" required>
-                @error('email')
-                    <div class="invalid-feedback text-center">{{ $message }}</div>
-                @enderror
             </div>
             <div class="mb-3">
                 <label class="form-label text-white">Password</label>
-                <input type="password" name="password" class="form-control bg-dark text-white border-0 @error('password') is-invalid @enderror" required>
-                @error('password')
-                    <div class="invalid-feedback text-center">{{ $message }}</div>
-                @enderror
+                <input type="password" name="password" class="form-control bg-dark text-white border-0" required>
             </div>
             
             <button type="submit" class="btn btn-success w-100">Log in</button>

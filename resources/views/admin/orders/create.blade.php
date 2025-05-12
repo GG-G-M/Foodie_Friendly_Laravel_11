@@ -34,6 +34,19 @@
                     @enderror
                 </div>
 
+                <!-- Payment Method -->
+                <div class="mb-3">
+                    <label for="payment_method" class="form-label" style="color: #6F4F37;">Payment Method</label>
+                    <select class="form-select" id="payment_method" name="payment_method" required>
+                        <option value="Cash on Delivery">Cash on Delivery</option>
+                        <option value="GCash">GCash</option>
+                        <option value="PayMaya">PayMaya</option>
+                    </select>
+                    @error('payment_method')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
+                </div>
+
                 <!-- Order Items -->
                 <div id="order-items-container">
                     <div class="order-item mb-3 border p-3" style="background-color: #fff; border-radius: 5px;">
@@ -58,7 +71,7 @@
                                 @enderror
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">&nbsp;</label>
+                                <label class="form-label"> </label>
                                 <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
                             </div>
                         </div>
@@ -107,7 +120,7 @@
                     <input type="number" class="form-control" id="quantity_${itemIndex}" name="items[${itemIndex}][quantity]" min="1" value="1" required>
                 </div>
                 <div class="col-md-3 mb-3">
-                    <label class="form-label">&nbsp;</label>
+                    <label class="form-label"> </label>
                     <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
                 </div>
             </div>

@@ -24,10 +24,17 @@ class AdminController extends Controller
             $totalCustomers = User::where('role', 'customer')->count();
             $totalRiders = User::where('role', 'rider')->count();
             
-            $totalOrders = 2.355;
-            $totalRevenue = 5.2222;
-            $recentOrders = 5.22222;
-    
+            // Calculate total orders
+            $totalOrders = Order::count();
+
+            // Calculate total revenue (sum of total_amount for delivered orders)
+            $totalRevenue = Order::where('status', 'delivered')
+                ->sum('total_amount');
+
+            // Calculate recent orders (orders from the last 7 days)
+            $recentOrders = Order::where('order_date', '>=', now()->subDays(7))
+                ->count();
+
             return view('admin.dashboard', compact(
                 'totalUsers',
                 'totalAdmins',

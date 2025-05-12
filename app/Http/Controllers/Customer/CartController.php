@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
@@ -92,6 +93,16 @@ class CartController extends Controller
             return $item->food->price * $item->quantity;
         });
 
+        // Fetch the latest delivery fee
+        $deliveryFee = DB::table('delivery_fees')
+            ->orderBy('date_added', 'desc')
+            ->first()->fee ?? 50.00;
+
+        // Add delivery fee to total amount if payment method is Cash on Delivery
+        if ($validated['payment_method'] === 'Cash on Delivery') {
+            $totalAmount += $deliveryFee;
+        }
+
         $order = Order::create([
             'user_id' => Auth::id(),
             'total_amount' => $totalAmount,
@@ -99,6 +110,7 @@ class CartController extends Controller
             'status' => 'pending',
             'payment_status' => 'pending',
             'payment_method' => $validated['payment_method'],
+            'delivery_fee' => $deliveryFee,
             'order_date' => now(),
         ]);
 

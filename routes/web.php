@@ -10,7 +10,6 @@ use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\RiderController;
 use App\Http\Controllers\Rider\RiderDashboardController;
-
 use App\Http\Middleware\CheckRole;
 
 /*
@@ -117,6 +116,10 @@ Route::middleware(['auth', CheckRole::class . ':admin'])->group(function () {
     Route::post('/orders/{order}/start-delivery', [OrderController::class, 'startDelivery'])->name('admin.orders.start_delivery');
     Route::post('/orders/{order}/complete-delivery', [OrderController::class, 'completeDelivery'])->name('admin.orders.complete_delivery');
 
+    // Delivery Fee Management
+    Route::get('/set-delivery-fee', [OrderController::class, 'setDeliveryFee'])->name('admin.set_delivery_fee');
+    Route::post('/set-delivery-fee', [OrderController::class, 'updateDeliveryFee'])->name('admin.update_delivery_fee');
+
     // Sales Report Routes
     Route::get('/sales-report', [SalesController::class, 'index'])->name('admin.sales_report');
     Route::post('/sales-report/filter', [SalesController::class, 'filter'])->name('admin.sales_report.filter');
@@ -124,15 +127,19 @@ Route::middleware(['auth', CheckRole::class . ':admin'])->group(function () {
 
 // Rider routes
 Route::middleware(['auth', CheckRole::class . ':rider'])->prefix('rider')->name('rider.')->group(function () {
-    Route::get('/dashboard', [RiderDashboardController::class, 'index'])->name('index');
+    // Redirect /dashboard to /index
+    Route::get('/dashboard', function () {
+        return redirect()->route('rider.index');
+    })->name('dashboard');
+
+    Route::get('/index', [RiderDashboardController::class, 'index'])->name('index');
+    Route::get('/orders', [RiderDashboardController::class, 'orders'])->name('orders');
+    Route::get('/my-deliveries', [RiderDashboardController::class, 'myDeliveries'])->name('my-deliveries');
+    Route::get('/earnings', [RiderDashboardController::class, 'earnings'])->name('earnings');
+    Route::get('/profile', [RiderDashboardController::class, 'profile'])->name('profile');
+
     Route::post('/start-delivery/{order}', [RiderDashboardController::class, 'startDelivery'])->name('startDelivery');
     Route::post('/finish-delivery/{order}', [RiderDashboardController::class, 'finishDelivery'])->name('finishDelivery');
-
-    // ✅ Add this profile route here
-  Route::get('/profile', function () {
-    return view('rider.profile');  // Laravel will look for resources/views/rider/profile.blade.php
-})->name('profile');
-
 });
 
 /*

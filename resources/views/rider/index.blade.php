@@ -19,6 +19,29 @@
             </div>
         @endif
 
+        <!-- Dashboard Summary -->
+        <div class="card shadow mb-4" style="border-radius: 12px; background-color: #fefaf3;">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #c8a879;">
+                <h5 class="fw-bold text-dark mb-0" style="font-size: 1.5rem;"><i class="bi bi-house-door me-1"></i> Dashboard</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 text-center" style="background-color: #fff; border-radius: 8px;">
+                            <h6 class="fw-bold" style="font-size: 1.2rem;">Total Deliveries</h6>
+                            <p style="font-size: 1.5rem; color: #5D3A00;">{{ $totalDeliveries }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 text-center" style="background-color: #fff; border-radius: 8px;">
+                            <h6 class="fw-bold" style="font-size: 1.2rem;">Total Earnings</h6>
+                            <p style="font-size: 1.5rem; color: #5D3A00;">₱{{ number_format($totalEarnings, 2) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Current Order -->
         @if($currentOrder)
             <div class="card shadow mb-4" style="border-radius: 12px; background-color: #fefaf3;">
@@ -30,13 +53,13 @@
                     <p style="font-size: 1.2rem;"><strong>Delivery Address:</strong> {{ $currentOrder->delivery_address ?? 'Not specified' }}</p>
                     <p style="font-size: 1.2rem;"><strong>Payment Method:</strong> {{ $currentOrder->payment_method ?? 'Not specified' }}</p>
                     <p style="font-size: 1.2rem;"><strong>Status:</strong> 
-                        <span class="badge rounded-pill badge-{{ $currentOrder->status }}">
+                        <span class="badge rounded-pill badge-{{ str_replace(' ', '-', $currentOrder->status) }}">
                             {{ ucfirst($currentOrder->status) }}
                         </span>
                     </p>
                     <h5 style="font-size: 1.3rem;">Order Items:</h5>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover mb-0">
+                        <table class="table table-bordered table-hover mb-0" style="min-width: 600px;">
                             <thead class="text-white" style="background-color: #3e3e3e;">
                                 <tr>
                                     <th>Food</th>
@@ -60,7 +83,7 @@
                     <div class="mt-3">
                         @php
                             $subtotal = $currentOrder->orderItems->sum(fn($item) => $item->price * $item->quantity);
-                            $deliveryFee = 50;
+                            $deliveryFee = $currentOrder->payment_method === 'Cash on Delivery' ? 50 : 0;
                             $tax = $subtotal * 0.1;
                         @endphp
                         <div class="d-flex justify-content-between" style="font-size: 1.1rem;">
@@ -69,16 +92,16 @@
                         </div>
                         <div class="d-flex justify-content-between" style="font-size: 1.1rem;">
                             <span>Delivery Fee</span>
-                            <span>₱{{ ($currentOrder->payment_method === 'Cash on Delivery') ? '50.00' : '0.00' }}</span>
+                            <span>₱{{ number_format($deliveryFee, 2) }}</span>
                         </div>
                         <div class="d-flex justify-content-between" style="font-size: 1.1rem;">
                             <span>Tax (10%)</span>
-                            <span>₱{{ ($currentOrder->payment_method === 'Cash on Delivery') ? number_format($tax, 2) : '0.00' }}</span>
+                            <span>₱{{ number_format($tax, 2) }}</span>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between fw-bold" style="font-size: 1.2rem;">
                             <span>Total</span>
-                            <span style="color: #5D3A00;">₱{{ number_format($currentOrder->display_total, 2) }}</span>
+                            <span style="color: #5D3A00;">₱{{ number_format($currentOrderTotal, 2) }}</span>
                         </div>
                     </div>
                     <div class="mt-3 text-end">
@@ -94,64 +117,6 @@
                 </div>
             </div>
         @endif
-
-        <!-- Available Orders -->
-        <div class="card shadow" style="border-radius: 12px; background-color: #fefaf3;">
-            <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #c8a879;">
-                <h5 class="fw-bold text-dark mb-0" style="font-size: 1.5rem;"><i class="bi bi-list-ul me-1"></i> Available Orders</h5>
-                <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-danger btn-sm">
-                        <i class="bi bi-box-arrow-right me-1"></i> Logout
-                    </button>
-                </form>
-            </div>
-            <div class="card-body">
-                @if($currentOrder)
-                    <p class="text-center" style="font-size: 1.1rem;">You are currently handling an order. Complete it to select another.</p>
-                @elseif($pendingOrders->isEmpty())
-                    <p class="text-center" style="font-size: 1.1rem;">No pending orders available at the moment.</p>
-                @else
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover mb-0">
-                            <thead class="text-white" style="background-color: #3e3e3e;">
-                                <tr>
-                                    <th>#</th>
-                                    <th>Customer</th>
-                                    <th>Delivery Address</th>
-                                    <th>Payment Method</th>
-                                    <th>Total Price</th>
-                                    <th>Ordered At</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($pendingOrders as $order)
-                                    <tr>
-                                        <td>{{ $order->id }}</td>
-                                        <td>{{ $order->user->name }}</td>
-                                        <td>{{ $order->delivery_address ?? 'Not specified' }}</td>
-                                        <td>{{ $order->payment_method ?? 'Not specified' }}</td>
-                                        <td>
-                                            ₱{{ number_format($order->display_total, 2) }}
-                                        </td>
-                                        <td>{{ $order->order_date->format('Y-m-d H:i') }}</td>
-                                        <td>
-                                            <form action="{{ route('rider.startDelivery', $order) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="btn btn-primary btn-sm">
-                                                    <i class="bi bi-play-circle me-1"></i> Start Delivery
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
-            </div>
-        </div>
     </div>
 
 </div>
@@ -169,6 +134,11 @@
 
     .badge-delivered {
         background-color: #28a745; 
+        color: #fff;
+    }
+
+    .badge-cancelled {
+        background-color: #dc3545; 
         color: #fff;
     }
 </style>

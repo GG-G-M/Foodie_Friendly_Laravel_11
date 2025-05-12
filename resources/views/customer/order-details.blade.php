@@ -44,7 +44,27 @@
                             </li>
                         @endforeach
                     </ul>
-                    <p><strong>Total Amount:</strong> ₱{{ number_format($order->total_amount, 2) }}</p>
+                    <div class="mb-3">
+                        @php
+                            $subtotal = $order->orderItems->sum(fn($item) => $item->price * $item->quantity);
+                            $deliveryFee = $order->payment_method === 'Cash on Delivery' ? $order->delivery_fee : 0;
+                        @endphp
+                        <div class="d-flex justify-content-between">
+                            <span>Subtotal</span>
+                            <span>₱{{ number_format($subtotal, 2) }}</span>
+                        </div>
+                        @if($order->payment_method === 'Cash on Delivery')
+                            <div class="d-flex justify-content-between">
+                                <span>Delivery Fee</span>
+                                <span>₱{{ number_format($deliveryFee, 2) }}</span>
+                            </div>
+                        @endif
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold">
+                            <span>Total Amount</span>
+                            <span>₱{{ number_format($order->total_amount, 2) }}</span>
+                        </div>
+                    </div>
                     <p><strong>Payment Method:</strong> {{ $order->payment_method }}</p>
                     <p><strong>Payment Status:</strong> {{ ucfirst($order->payment_status) }}</p>
                     <p><strong>Delivery Address:</strong> {{ $order->delivery_address }}</p>
