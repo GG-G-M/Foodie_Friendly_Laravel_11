@@ -47,13 +47,14 @@
                     <div class="mb-3">
                         @php
                             $subtotal = $order->orderItems->sum(fn($item) => $item->price * $item->quantity);
-                            $deliveryFee = $order->payment_method === 'Cash on Delivery' ? $order->delivery_fee : 0;
+                            $deliveryFee = $order->delivery_fee ?? 0;
+                            $totalWithDelivery = $subtotal + $deliveryFee;
                         @endphp
                         <div class="d-flex justify-content-between">
                             <span>Subtotal</span>
                             <span>₱{{ number_format($subtotal, 2) }}</span>
                         </div>
-                        @if($order->payment_method === 'Cash on Delivery')
+                        @if($deliveryFee > 0)
                             <div class="d-flex justify-content-between">
                                 <span>Delivery Fee</span>
                                 <span>₱{{ number_format($deliveryFee, 2) }}</span>
@@ -61,7 +62,7 @@
                         @endif
                         <hr>
                         <div class="d-flex justify-content-between fw-bold">
-                            <span>Total Amount</span>
+                            <span>Total Amount (includes delivery fee)</span>
                             <span>₱{{ number_format($order->total_amount, 2) }}</span>
                         </div>
                     </div>
@@ -76,9 +77,6 @@
                         <div class="progress mt-2">
                             <div class="progress-bar" id="status-progress" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
-                        @if($order->status !== 'delivered' && $order->status !== 'cancelled')
-                            <p>Estimated Delivery: {{ $order->order_date->addMinutes(30)->format('Y-m-d H:i') }} (approx. 30 mins)</p>
-                        @endif
                         @if($order->rider)
                             <p class="rider-info">Rider: {{ $order->rider->user->name ?? 'Not assigned' }} (Phone: {{ $order->rider->phone_number ?? 'N/A' }})</p>
                         @else

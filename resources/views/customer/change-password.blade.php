@@ -21,6 +21,9 @@
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('success') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <div class="mt-2">
+                                <a href="{{ route('profile') }}" class="btn btn-brown btn-sm">Back to Profile</a>
+                            </div>
                         </div>
                     @endif
                     @if (session('error'))

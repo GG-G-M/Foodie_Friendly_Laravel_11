@@ -12,15 +12,20 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'rider_id',
-        'total_amount', // Added
+        'total_amount',
         'delivery_address',
         'payment_method',
         'delivery_fee',
         'status',
-        'payment_status', // Added
+        'payment_status',
         'order_date',
         'created_at',
         'updated_at',
+    ];
+
+    // Cast order_date to a Carbon instance
+    protected $casts = [
+        'order_date' => 'datetime',
     ];
 
     // Relationships

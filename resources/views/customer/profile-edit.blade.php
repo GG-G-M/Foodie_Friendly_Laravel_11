@@ -21,6 +21,9 @@
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('success') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <div class="mt-2">
+                                <a href="{{ route('profile') }}" class="btn btn-brown btn-sm">Back to Profile</a>
+                            </div>
                         </div>
                     @endif
                     @if (session('error'))
@@ -59,6 +62,20 @@
                                         <i class="bi bi-envelope-fill me-2"></i>Email Address
                                     </label>
                                     @error('email')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Phone Number Field -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control bg-light-brown border-brown @error('phone') is-invalid @enderror" 
+                                           id="phone" name="phone" value="{{ old('phone', $user->phone) }}">
+                                    <label for="phone" class="text-brown">
+                                        <i class="bi bi-telephone-fill me-2"></i>Phone Number
+                                    </label>
+                                    @error('phone')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

@@ -98,10 +98,8 @@ class CartController extends Controller
             ->orderBy('date_added', 'desc')
             ->first()->fee ?? 50.00;
 
-        // Add delivery fee to total amount if payment method is Cash on Delivery
-        if ($validated['payment_method'] === 'Cash on Delivery') {
-            $totalAmount += $deliveryFee;
-        }
+        // Always add delivery fee to total amount
+        $totalAmount += $deliveryFee;
 
         $order = Order::create([
             'user_id' => Auth::id(),
@@ -131,7 +129,7 @@ class CartController extends Controller
     public function orders()
     {
         $orders = Order::where('user_id', Auth::id())
-            ->with('orderItems.food', 'rider.user') // Eager load rider and rider's user
+            ->with('orderItems.food', 'rider.user')
             ->latest()
             ->paginate(10);
         return view('customer.order-history', compact('orders'));
@@ -141,7 +139,7 @@ class CartController extends Controller
     {
         $order = Order::where('id', $id)
             ->where('user_id', Auth::id())
-            ->with('orderItems.food', 'rider.user') // Eager load rider and rider's user
+            ->with('orderItems.food', 'rider.user')
             ->firstOrFail();
         return view('customer.order-details', compact('order'));
     }
@@ -169,7 +167,7 @@ class CartController extends Controller
     {
         $order = Order::where('id', $id)
             ->where('user_id', Auth::id())
-            ->with('rider.user') // Eager load rider and rider's user
+            ->with('rider.user')
             ->firstOrFail();
 
         return response()->json([

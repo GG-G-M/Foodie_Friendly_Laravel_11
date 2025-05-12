@@ -73,7 +73,31 @@
                     </table>
                 </div>
                 <div class="text-end mt-3">
-                    <h5>Total: ₱{{ number_format($total, 2) }}</h5>
+                    @php
+                        $deliveryFee = \Illuminate\Support\Facades\DB::table('delivery_fees')
+                            ->orderBy('date_added', 'desc')
+                            ->first()->fee ?? 50.00;
+                        $totalWithDelivery = $total + $deliveryFee;
+                    @endphp
+                    <div class="d-flex justify-content-end">
+                        <div style="width: 300px;">
+                            <div class="d-flex justify-content-between">
+                                <span>Subtotal</span>
+                                <span>₱{{ number_format($total, 2) }}</span>
+                            </div>
+                            @if($deliveryFee > 0)
+                                <div class="d-flex justify-content-between">
+                                    <span>Delivery Fee</span>
+                                    <span>₱{{ number_format($deliveryFee, 2) }}</span>
+                                </div>
+                            @endif
+                            <hr>
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>Total (includes delivery fee)</span>
+                                <span>₱{{ number_format($totalWithDelivery, 2) }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -103,31 +127,20 @@
                         @enderror
                     </div>
                     <div class="mb-3">
-                        @php
-                            $deliveryFee = \Illuminate\Support\Facades\DB::table('delivery_fees')
-                                ->orderBy('date_added', 'desc')
-                                ->first()->fee ?? 50.00;
-                        @endphp
-                        <div id="delivery-fee-breakdown" style="display: none;">
-                            <div class="d-flex justify-content-between">
-                                <span>Subtotal</span>
-                                <span>₱{{ number_format($total, 2) }}</span>
-                            </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Subtotal</span>
+                            <span>₱{{ number_format($total, 2) }}</span>
+                        </div>
+                        @if($deliveryFee > 0)
                             <div class="d-flex justify-content-between">
                                 <span>Delivery Fee</span>
                                 <span>₱{{ number_format($deliveryFee, 2) }}</span>
                             </div>
-                            <hr>
-                            <div class="d-flex justify-content-between fw-bold">
-                                <span>Total</span>
-                                <span>₱{{ number_format($total + $deliveryFee, 2) }}</span>
-                            </div>
-                        </div>
-                        <div id="no-delivery-fee" style="display: block;">
-                            <div class="d-flex justify-content-between fw-bold">
-                                <span>Total</span>
-                                <span>₱{{ number_format($total, 2) }}</span>
-                            </div>
+                        @endif
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold">
+                            <span>Total (includes delivery fee)</span>
+                            <span>₱{{ number_format($totalWithDelivery, 2) }}</span>
                         </div>
                     </div>
                     <div class="text-end">
@@ -150,23 +163,6 @@
                     successAlert.classList.remove('show');
                 }, 3000);
             }
-
-            const paymentMethod = document.getElementById('payment_method');
-            const deliveryFeeBreakdown = document.getElementById('delivery-fee-breakdown');
-            const noDeliveryFee = document.getElementById('no-delivery-fee');
-
-            paymentMethod.addEventListener('change', function () {
-                if (this.value === 'Cash on Delivery') {
-                    deliveryFeeBreakdown.style.display = 'block';
-                    noDeliveryFee.style.display = 'none';
-                } else {
-                    deliveryFeeBreakdown.style.display = 'none';
-                    noDeliveryFee.style.display = 'block';
-                }
-            });
-
-            // Trigger change event on page load to set initial state
-            paymentMethod.dispatchEvent(new Event('change'));
         });
     </script>
 @endsection
