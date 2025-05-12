@@ -15,8 +15,25 @@ class CartController extends Controller
 {
     public function index()
     {
-        $foods = Food::all();
-        return view('customer.index', compact('foods'));
+        $foods = Food::query();
+
+        // Apply search if provided
+        if (request()->has('q') && request()->input('q')) {
+            $searchTerm = request()->input('q');
+            $foods->where('name', 'like', "%$searchTerm%")
+                  ->orWhere('description', 'like', "%$searchTerm%");
+        }
+
+        // Apply category filter if provided
+        if (request()->has('category') && request()->input('category')) {
+            $category = request()->input('category');
+            $foods->where('category', $category);
+        }
+
+        $foods = $foods->get();
+        $categories = Food::distinct()->pluck('category')->filter()->values(); // Get unique categories, remove nulls
+
+        return view('customer.index', compact('foods', 'categories'));
     }
 
     public function viewCart()
@@ -93,12 +110,10 @@ class CartController extends Controller
             return $item->food->price * $item->quantity;
         });
 
-        // Fetch the latest delivery fee
         $deliveryFee = DB::table('delivery_fees')
             ->orderBy('date_added', 'desc')
             ->first()->fee ?? 50.00;
 
-        // Always add delivery fee to total amount
         $totalAmount += $deliveryFee;
 
         $order = Order::create([
