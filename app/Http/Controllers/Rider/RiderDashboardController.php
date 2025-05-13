@@ -4,14 +4,17 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class RiderDashboardController extends Controller
 {
     public function index()
     {
+        if (Auth::check() && Auth::user()->role !== 'rider') {
+            abort(403, 'Unauthorized action.');
+        }
         $rider = Auth::user()->rider;
 
         // Current Order
@@ -29,8 +32,9 @@ class RiderDashboardController extends Controller
         $deliveredOrders = Order::where('rider_id', $rider->id)
                                 ->where('status', 'delivered')
                                 ->get();
-        $totalEarnings = $deliveredOrders->sum(function ($order) {
-            return $order->payment_method === 'Cash on Delivery' ? Setting::where('key', 'delivery_fee')->value('value') : 0;
+        $deliveryFee = DB::table('delivery_fees')->orderBy('date_added', 'desc')->first()->fee ?? 50.00;
+        $totalEarnings = $deliveredOrders->sum(function ($order) use ($deliveryFee) {
+            return $order->payment_method === 'Cash on Delivery' ? $deliveryFee : 0;
         });
 
         // Calculate total for current order
@@ -42,13 +46,16 @@ class RiderDashboardController extends Controller
     protected function calculateOrderTotal($order)
     {
         $subtotal = $order->orderItems->sum(fn($item) => $item->price * $item->quantity);
-        $deliveryFee = $order->payment_method === 'Cash on Delivery' ? Setting::where('key', 'delivery_fee')->value('value') : 0;
-        // Removed VAT (tax) calculation
+        $deliveryFee = $order->payment_method === 'Cash on Delivery' ? 
+            (DB::table('delivery_fees')->orderBy('date_added', 'desc')->first()->fee ?? 50.00) : 0;
         return $subtotal + $deliveryFee;
     }
 
     public function orders()
     {
+        if (Auth::check() && Auth::user()->role !== 'rider') {
+            abort(403, 'Unauthorized action.');
+        }
         $rider = Auth::user()->rider;
         $currentOrder = Order::where('rider_id', $rider->id)
                              ->where('status', 'delivering')
@@ -72,6 +79,9 @@ class RiderDashboardController extends Controller
 
     public function myDeliveries()
     {
+        if (Auth::check() && Auth::user()->role !== 'rider') {
+            abort(403, 'Unauthorized action.');
+        }
         $rider = Auth::user()->rider;
         $deliveredOrders = Order::where('rider_id', $rider->id)
                                 ->whereIn('status', ['delivered', 'cancelled'])
@@ -84,26 +94,46 @@ class RiderDashboardController extends Controller
 
     public function earnings()
     {
+        if (Auth::check() && Auth::user()->role !== 'rider') {
+            abort(403, 'Unauthorized action.');
+        }
         $rider = Auth::user()->rider;
         $deliveredOrders = Order::where('rider_id', $rider->id)
                                 ->where('status', 'delivered')
                                 ->with('orderItems.food')
                                 ->get();
 
-        $totalEarnings = $deliveredOrders->sum(function ($order) {
-            return $order->payment_method === 'Cash on Delivery' ? Setting::where('key', 'delivery_fee')->value('value') : 0;
+        $deliveryFee = DB::table('delivery_fees')->orderBy('date_added', 'desc')->first()->fee ?? 50.00;
+        $totalEarnings = $deliveredOrders->sum(function ($order) use ($deliveryFee) {
+            return $order->payment_method === 'Cash on Delivery' ? $deliveryFee : 0;
         });
 
         return view('rider.earnings', compact('deliveredOrders', 'totalEarnings'));
     }
 
-    public function profile()
+    public function showProfile()
     {
-        return view('rider.profile');
+        if (Auth::check() && Auth::user()->role !== 'rider') {
+            abort(403, 'Unauthorized action.');
+        }
+        $user = Auth::user();
+        return view('rider.profile-show', compact('user'));
+    }
+
+    public function editProfile()
+    {
+        if (Auth::check() && Auth::user()->role !== 'rider') {
+            abort(403, 'Unauthorized action.');
+        }
+        $user = Auth::user();
+        return view('rider.profile', compact('user')); // Note: 'profile' is the edit view for riders
     }
 
     public function startDelivery(Request $request, Order $order)
     {
+        if (Auth::check() && Auth::user()->role !== 'rider') {
+            abort(403, 'Unauthorized action.');
+        }
         if ($order->status !== 'pending' || $order->rider_id) {
             return redirect()->route('rider.orders')->with('error', 'This order is already taken or not available.');
         }
@@ -128,6 +158,9 @@ class RiderDashboardController extends Controller
 
     public function finishDelivery(Request $request, Order $order)
     {
+        if (Auth::check() && Auth::user()->role !== 'rider') {
+            abort(403, 'Unauthorized action.');
+        }
         if ($order->status !== 'delivering' || $order->rider_id !== Auth::user()->rider->id) {
             return redirect()->route('rider.index')->with('error', 'You cannot finish this order.');
         }

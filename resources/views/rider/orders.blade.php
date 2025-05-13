@@ -58,8 +58,7 @@
                 <div class="mt-3">
                     @php
                         $subtotal = $currentOrder->orderItems->sum(fn($item) => $item->price * $item->quantity);
-                        $deliveryFee = $currentOrder->payment_method === 'Cash on Delivery' ? 50 : 0;
-                        $tax = $subtotal * 0.1;
+                        $deliveryFee = $currentOrder->payment_method === 'Cash on Delivery' ? ($currentOrder->delivery_fee ?? 50.00) : 0;
                     @endphp
                     <div class="d-flex justify-content-between" style="font-size: 1.1rem;">
                         <span>Subtotal</span>
@@ -68,10 +67,6 @@
                     <div class="d-flex justify-content-between" style="font-size: 1.1rem;">
                         <span>Delivery Fee</span>
                         <span>₱{{ number_format($deliveryFee, 2) }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between" style="font-size: 1.1rem;">
-                        <span>Tax (10%)</span>
-                        <span>₱{{ number_format($tax, 2) }}</span>
                     </div>
                     <hr>
                     <div class="d-flex justify-content-between fw-bold" style="font-size: 1.2rem;">
