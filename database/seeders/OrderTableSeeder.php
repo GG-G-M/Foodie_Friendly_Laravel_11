@@ -8,6 +8,7 @@ use App\Models\Rider;
 use App\Models\Food;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Support\Facades\DB;
 
 class OrderTableSeeder extends Seeder
 {
@@ -37,7 +38,12 @@ class OrderTableSeeder extends Seeder
             return;
         }
 
-        // Step 4: Define possible statuses and payment methods
+        // Step 4: Fetch the latest delivery fee
+        $deliveryFee = DB::table('delivery_fees')
+            ->orderBy('date_added', 'desc')
+            ->first()->fee ?? 50.00;
+
+        // Step 5: Define possible statuses, payment methods, and addresses
         $statuses = ['pending', 'delivering', 'delivered', 'cancelled'];
         $paymentMethods = ['Cash on Delivery', 'GCash', 'PayMaya'];
         $addresses = [
@@ -49,7 +55,7 @@ class OrderTableSeeder extends Seeder
             '303 Cedar St, City F',
         ];
 
-        // Step 5: Create 25 Orders
+        // Step 6: Create 25 Orders
         for ($i = 0; $i < 25; $i++) {
             // Determine customer, rider, status, and payment method
             $customer = $customers[$i % $customers->count()];
@@ -62,7 +68,8 @@ class OrderTableSeeder extends Seeder
             $order = Order::create([
                 'user_id' => $customer->id,
                 'rider_id' => $rider ? $rider->id : null,
-                'total_amount' => 0, // Will be updated after adding order items
+                'total_amount' => 0, // Will be updated to items' subtotal
+                'delivery_fee' => $deliveryFee,
                 'delivery_address' => $addresses[$i % count($addresses)],
                 'status' => $status,
                 'payment_status' => $status === 'delivered' ? 'completed' : 'pending',
@@ -85,8 +92,8 @@ class OrderTableSeeder extends Seeder
                 ];
             }
 
-            // Calculate total and create order items
-            $total = 0;
+            // Calculate items' subtotal and create order items
+            $itemsTotal = 0;
             foreach ($orderItems as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -94,11 +101,13 @@ class OrderTableSeeder extends Seeder
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
                 ]);
-                $total += $item['price'] * $item['quantity'];
+                $itemsTotal += $item['price'] * $item['quantity'];
             }
-            $order->update(['total_amount' => $total]);
+
+            // Update total_amount to items' subtotal only
+            $order->update(['total_amount' => $itemsTotal]);
         }
 
-        $this->command->info('25 Orders and their Order Items seeded successfully!');
+        $this->command->info('25 Orders and their Order Items seeded successfully with delivery fees!');
     }
 }

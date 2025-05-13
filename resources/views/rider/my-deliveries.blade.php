@@ -5,7 +5,6 @@
 @section('content')
 <div class="container mt-2 d-flex justify-content-center">
 
-    <div class="col-md-8">
         <!-- Flash Messages -->
         @if(session('success'))
             <div class="alert alert-success">
@@ -48,7 +47,14 @@
                                         <td>{{ $order->user->name }}</td>
                                         <td>{{ $order->delivery_address ?? 'Not specified' }}</td>
                                         <td>{{ $order->payment_method ?? 'Not specified' }}</td>
-                                        <td>₱{{ number_format($order->display_total, 2) }}</td>
+                                        <td>
+                                            @php
+                                                $subtotal = $order->orderItems->sum(fn($item) => $item->price * $item->quantity);
+                                                $deliveryFee = $order->delivery_fee ?? 50.00;
+                                                $total = $subtotal + $deliveryFee;
+                                            @endphp
+                                            ₱{{ number_format($total, 2) }}
+                                        </td>
                                         <td>
                                             <span class="badge rounded-pill badge-{{ $order->status }}">
                                                 {{ ucfirst($order->status) }}
@@ -63,7 +69,6 @@
                 @endif
             </div>
         </div>
-    </div>
 
 </div>
 

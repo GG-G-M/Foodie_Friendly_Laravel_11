@@ -47,7 +47,7 @@
                                     <tr>
                                         <td>{{ $order->id }}</td>
                                         <td>{{ $order->user->name }}</td>
-                                        <td>₱{{ $order->payment_method === 'Cash on Delivery' ? '50.00' : '0.00' }}</td>
+                                        <td>₱{{ number_format($order->delivery_fee ?? 50.00, 2) }}</td>
                                         <td>{{ $order->updated_at->format('Y-m-d H:i') }}</td>
                                     </tr>
                                 @endforeach

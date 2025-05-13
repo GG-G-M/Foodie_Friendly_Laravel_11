@@ -32,10 +32,7 @@ class RiderDashboardController extends Controller
         $deliveredOrders = Order::where('rider_id', $rider->id)
                                 ->where('status', 'delivered')
                                 ->get();
-        $deliveryFee = DB::table('delivery_fees')->orderBy('date_added', 'desc')->first()->fee ?? 50.00;
-        $totalEarnings = $deliveredOrders->sum(function ($order) use ($deliveryFee) {
-            return $order->payment_method === 'Cash on Delivery' ? $deliveryFee : 0;
-        });
+        $totalEarnings = $deliveredOrders->sum('delivery_fee'); // Sum delivery_fee for all orders
 
         // Calculate total for current order
         $currentOrderTotal = $currentOrder ? $this->calculateOrderTotal($currentOrder) : 0;
@@ -46,8 +43,7 @@ class RiderDashboardController extends Controller
     protected function calculateOrderTotal($order)
     {
         $subtotal = $order->orderItems->sum(fn($item) => $item->price * $item->quantity);
-        $deliveryFee = $order->payment_method === 'Cash on Delivery' ? 
-            (DB::table('delivery_fees')->orderBy('date_added', 'desc')->first()->fee ?? 50.00) : 0;
+        $deliveryFee = $order->delivery_fee ?? (DB::table('delivery_fees')->orderBy('date_added', 'desc')->first()->fee ?? 50.00);
         return $subtotal + $deliveryFee;
     }
 
@@ -103,10 +99,7 @@ class RiderDashboardController extends Controller
                                 ->with('orderItems.food')
                                 ->get();
 
-        $deliveryFee = DB::table('delivery_fees')->orderBy('date_added', 'desc')->first()->fee ?? 50.00;
-        $totalEarnings = $deliveredOrders->sum(function ($order) use ($deliveryFee) {
-            return $order->payment_method === 'Cash on Delivery' ? $deliveryFee : 0;
-        });
+        $totalEarnings = $deliveredOrders->sum('delivery_fee'); // Sum delivery_fee for all orders
 
         return view('rider.earnings', compact('deliveredOrders', 'totalEarnings'));
     }
@@ -126,7 +119,7 @@ class RiderDashboardController extends Controller
             abort(403, 'Unauthorized action.');
         }
         $user = Auth::user();
-        return view('rider.profile', compact('user')); // Note: 'profile' is the edit view for riders
+        return view('rider.profile', compact('user'));
     }
 
     public function startDelivery(Request $request, Order $order)

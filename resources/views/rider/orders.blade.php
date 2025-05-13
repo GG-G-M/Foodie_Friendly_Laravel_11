@@ -58,7 +58,7 @@
                 <div class="mt-3">
                     @php
                         $subtotal = $currentOrder->orderItems->sum(fn($item) => $item->price * $item->quantity);
-                        $deliveryFee = $currentOrder->payment_method === 'Cash on Delivery' ? ($currentOrder->delivery_fee ?? 50.00) : 0;
+                        $deliveryFee = $currentOrder->delivery_fee ?? 50.00;
                     @endphp
                     <div class="d-flex justify-content-between" style="font-size: 1.1rem;">
                         <span>Subtotal</span>

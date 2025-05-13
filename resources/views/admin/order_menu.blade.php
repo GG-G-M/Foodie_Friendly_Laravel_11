@@ -24,9 +24,9 @@
             📋 Order List
         </div>
         <div class="card-body">
-            <a href="{{ route('admin.orders.create') }}" class="btn btn-success mb-3 me-2">
+            {{-- <a href="{{ route('admin.orders.create') }}" class="btn btn-success mb-3 me-2">
                 <i class="bi bi-plus-circle"></i> Create Order
-            </a>
+            </a> --}}
             <a href="{{ route('admin.set_delivery_fee') }}" class="btn btn-info mb-3">
                 <i class="bi bi-gear"></i> Set Delivery Fee
             </a>
