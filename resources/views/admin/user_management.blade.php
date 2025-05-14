@@ -199,6 +199,7 @@
                             <th>ID</th>
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Phone Number</th>
                             <th>Role</th>
                             <th>Actions</th>
                         </tr>
@@ -209,6 +210,13 @@
                             <td>{{ $user->id }}</td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
+                            <td>
+                                @if($user->role === 'rider' && $user->rider)
+                                    {{ $user->rider->phone_number ?? 'N/A' }}
+                                @else
+                                    {{ $user->phone ?? 'N/A' }}
+                                @endif
+                            </td>
                             <td>
                                 <span class="badge {{ $user->role === 'admin' ? 'badge-success' : ($user->role === 'customer' ? 'badge-primary' : 'badge-warning') }}">
                                     {{ $user->role }}

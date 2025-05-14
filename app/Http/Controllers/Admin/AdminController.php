@@ -11,11 +11,6 @@ use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    /**
-     * Display the admin dashboard.
-     *
-     * @return \Illuminate\View\View
-     */
     public function index()
     {
         try {
@@ -24,25 +19,13 @@ class AdminController extends Controller
             $totalCustomers = User::where('role', 'customer')->count();
             $totalRiders = User::where('role', 'rider')->count();
             
-            // Calculate total orders
             $totalOrders = Order::count();
-
-            // Calculate total revenue (sum of total_amount for delivered orders)
-            $totalRevenue = Order::where('status', 'delivered')
-                ->sum('total_amount');
-
-            // Calculate recent orders (orders from the last 7 days)
-            $recentOrders = Order::where('order_date', '>=', now()->subDays(7))
-                ->count();
+            $totalRevenue = Order::where('status', 'delivered')->sum('total_amount');
+            $recentOrders = Order::where('order_date', '>=', now()->subDays(7))->count();
 
             return view('admin.dashboard', compact(
-                'totalUsers',
-                'totalAdmins',
-                'totalCustomers',
-                'totalRiders',
-                'totalOrders',
-                'totalRevenue',
-                'recentOrders'
+                'totalUsers', 'totalAdmins', 'totalCustomers', 'totalRiders',
+                'totalOrders', 'totalRevenue', 'recentOrders'
             ));
         } catch (\Exception $e) {
             error_log('Error fetching dashboard data: ' . $e->getMessage());
@@ -50,12 +33,6 @@ class AdminController extends Controller
         }
     }
 
-    //-------------------------------------USER MANAGEMENT SECTION---------------------------------------
-    /**
-     * Display the user management page.
-     *
-     * @return \Illuminate\View\View
-     */
     public function userManagement(Request $request)
     {
         try {
@@ -84,11 +61,7 @@ class AdminController extends Controller
             $totalRiders = User::where('role', 'rider')->count();
 
             return view('admin.user_management', compact(
-                'users',
-                'totalUsers',
-                'totalCustomers',
-                'totalAdmins',
-                'totalRiders'
+                'users', 'totalUsers', 'totalCustomers', 'totalAdmins', 'totalRiders'
             ));
         } catch (\Exception $e) {
             error_log('Error fetching users: ' . $e->getMessage());
@@ -96,13 +69,11 @@ class AdminController extends Controller
         }
     }
 
-    // CREATE BUTTON [3]
     public function create()
     {
         return view('admin.users.create');
     }
 
-    // Store the new user
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -110,19 +81,26 @@ class AdminController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|confirmed',
             'role' => 'required|in:admin,customer,rider',
-            'phone_number' => 'nullable|string|max:20',
-            'license_number' => 'nullable|string|max:50',
+            'phone_number' => 'required|string|max:20',
+            'license_number' => 'nullable|string|max:50|required_if:role,rider',
         ], [
             'password.confirmed' => 'The passwords do not match.',
+            'license_number.required_if' => 'The license number is required for riders.',
         ]);
 
         try {
-            $user = User::create([
+            $userData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => bcrypt($validated['password']),
                 'role' => $validated['role'],
-            ]);
+            ];
+
+            if ($validated['role'] !== 'rider') {
+                $userData['phone'] = $validated['phone_number'];
+            }
+
+            $user = User::create($userData);
 
             if ($validated['role'] === 'rider') {
                 Rider::create([
@@ -135,18 +113,15 @@ class AdminController extends Controller
             return redirect()->route('admin.user_management')
                    ->with('success', 'User created successfully!');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error creating user: ' . $e->getMessage())
-                        ->withInput();
+            return back()->with('error', 'Error creating user: ' . $e->getMessage())->withInput();
         }
     }
 
-    // EDIT BUTTON [3]
     public function edit(User $user)
     {
         return view('admin.users.edit', compact('user'));
     }
 
-    // Process the update request
     public function update(Request $request, User $user)
     {
         try {
@@ -154,15 +129,25 @@ class AdminController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $user->id,
                 'role' => 'required|in:admin,customer,rider',
-                'phone_number' => 'nullable|string|max:20',
-                'license_number' => 'nullable|string|max:50',
+                'phone_number' => 'required|string|max:20',
+                'license_number' => 'nullable|string|max:50|required_if:role,rider',
+            ], [
+                'license_number.required_if' => 'The license number is required for riders.',
             ]);
 
-            $user->update([
+            $userData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'role' => $validated['role'],
-            ]);
+            ];
+
+            if ($validated['role'] !== 'rider') {
+                $userData['phone'] = $validated['phone_number'];
+            } else {
+                $userData['phone'] = null; // Clear phone from users table for riders
+            }
+
+            $user->update($userData);
 
             if ($validated['role'] === 'rider') {
                 $rider = $user->rider ?? new Rider(['user_id' => $user->id]);
@@ -183,7 +168,6 @@ class AdminController extends Controller
         }
     }
 
-    // DELETE BUTTON [3]
     public function destroy(User $user)
     {
         try {
@@ -195,7 +179,6 @@ class AdminController extends Controller
         }
     }
 
-    // New method to view rider details
     public function view(User $user)
     {
         if ($user->role !== 'rider' || !$user->rider) {
@@ -205,13 +188,11 @@ class AdminController extends Controller
         return view('admin.users.view', compact('user'));
     }
 
-    // Rider user controller (optional, replaced by userManagement)
     public function riderUsers()
     {
         return redirect()->route('admin.user_management', ['role_filter' => 'rider']);
     }
 
-    //-------------------------------------ORDER MENU SECTION---------------------------------------
     public function OrderCategories()
     {
         $foods = Food::orderBy('created_at', 'desc')->paginate(10);

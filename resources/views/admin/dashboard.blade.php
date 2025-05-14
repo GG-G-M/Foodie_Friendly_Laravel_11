@@ -77,11 +77,4 @@
         </div>
     </div>
 </div>  
-
-<div class="admin-card mt-4">
-    <div class="card-body">
-        <h5 class="card-title">Recent Activity</h5>
-        <!-- Recent activity content here -->
-    </div>
-</div>
 @endsection

@@ -45,29 +45,29 @@
                         </div>
 
                         <div class="form-group mb-3">
+                            <label for="phone_number">Phone Number:</label>
+                            <input type="text" name="phone_number" class="form-control @error('phone_number') is-invalid @enderror" value="{{ old('phone_number') }}" required>
+                            @error('phone_number')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group mb-3">
                             <label for="role">Role:</label>
-                            <select name="role" class="form-control @error('role') is-invalid @enderror" required>
-                                <option value="" disabled selected>Select a role</option>
-                                <option value="admin">Admin</option>
-                                <option value="customer">Customer</option>
-                                <option value="rider">Rider</option>
+                            <select name="role" id="role" class="form-control @error('role') is-invalid @enderror" required>
+                                <option value="" disabled {{ old('role') ? '' : 'selected' }}>Select a role</option>
+                                <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                                <option value="customer" {{ old('role') === 'customer' ? 'selected' : '' }}>Customer</option>
+                                <option value="rider" {{ old('role') === 'rider' ? 'selected' : '' }}>Rider</option>
                             </select>
                             @error('role')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
-                        <div class="form-group mb-3 rider-fields" style="display: none;">
-                            <label for="phone_number">Phone Number:</label>
-                            <input type="text" name="phone_number" class="form-control @error('phone_number') is-invalid @enderror" value="{{ old('phone_number') }}">
-                            @error('phone_number')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="form-group mb-3 rider-fields" style="display: none;">
+                        <div class="form-group mb-3">
                             <label for="license_number">License Number:</label>
-                            <input type="text" name="license_number" class="form-control @error('license_number') is-invalid @enderror" value="{{ old('license_number') }}">
+                            <input type="text" name="license_number" id="license_number" class="form-control @error('license_number') is-invalid @enderror" value="{{ old('license_number') }}" disabled>
                             @error('license_number')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -83,13 +83,37 @@
 </div>
 
 <script>
-    document.querySelector('select[name="role"]').addEventListener('change', function() {
-        const riderFields = document.querySelectorAll('.rider-fields');
-        if (this.value === 'rider') {
-            riderFields.forEach(field => field.style.display = 'block');
-        } else {
-            riderFields.forEach(field => field.style.display = 'none');
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleSelect = document.querySelector('#role');
+        const licenseInput = document.querySelector('#license_number');
+
+        if (!roleSelect || !licenseInput) {
+            console.error('Role select or license input not found in DOM');
+            return;
         }
+
+        roleSelect.addEventListener('change', function() {
+            console.log('Role changed to:', this.value); // Debug log
+            if (this.value === 'rider') {
+                licenseInput.disabled = false;
+                console.log('Enabling license input');
+            } else {
+                licenseInput.disabled = true;
+                licenseInput.value = ''; // Clear the value when not rider
+                console.log('Disabling license input');
+            }
+        });
+
+        // Set initial state based on current value
+        const initialRole = roleSelect.value;
+        console.log('Initial role:', initialRole); // Debug log
+        if (initialRole !== 'rider') {
+            licenseInput.disabled = true;
+            licenseInput.value = '';
+        }
+
+        // Trigger change event to ensure state is set
+        roleSelect.dispatchEvent(new Event('change'));
     });
 </script>
-@endsections
+@endsection
