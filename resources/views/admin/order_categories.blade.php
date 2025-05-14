@@ -120,7 +120,7 @@
                     </table>
                 </div>
                 <div class="mt-3">
-                    {{ $foods->links() }}
+                    {{ $foods->links('pagination::bootstrap-5') }}
                 </div>
             @endif
         </div>

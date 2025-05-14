@@ -101,15 +101,21 @@
                         @endforeach
                     </tbody>
                 </table>
-                
+                            <div class="d-flex justify-content-center mt-4">
+                {{ $orders->appends([
+                    'search' => request('search'),
+                    'role_filter' => request('role_filter')
+                ])->links('pagination::bootstrap-4') }}
+                </div>
+{{-- 
                 <div class="mt-3">
                     {{ $orders->links() }}
-                </div>
+                </div> --}}
+
             @endif
         </div>
     </div>
 </div>
-
 <style>
     .badge-pending {
         background-color: #d2b48c; 
