@@ -66,16 +66,19 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string|max:15|unique:users,phone',
             'password' => 'required|confirmed',
             'role' => 'required|in:admin,customer,rider',
         ], [
             'password.confirmed' => 'The passwords do not match.',
+            'phone.unique' => 'The phone number is already registered.',
         ]);
 
         try {
             User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
+                'phone' => $validated['phone'],
                 'password' => bcrypt($validated['password']),
                 'role' => $validated['role'],
             ]);

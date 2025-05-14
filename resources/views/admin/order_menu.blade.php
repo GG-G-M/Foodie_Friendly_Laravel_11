@@ -101,7 +101,8 @@
                         @endforeach
                     </tbody>
                 </table>
-                            <div class="d-flex justify-content-center mt-4">
+                
+                <div class="d-flex justify-content-center mt-4">
                 {{ $orders->appends([
                     'search' => request('search'),
                     'role_filter' => request('role_filter')
