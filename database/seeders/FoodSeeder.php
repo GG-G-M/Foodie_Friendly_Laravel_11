@@ -4,11 +4,24 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Food;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class FoodSeeder extends Seeder
 {
     public function run()
     {
+        // Define the source and destination directories
+        $sourceDir = public_path('image'); // Source where your images are currently located
+        $destinationDir = storage_path('app/public/food_images');
+
+        // Create the destination directory if it doesn't exist
+        if (!File::exists($destinationDir)) {
+            File::makeDirectory($destinationDir, 0755, true);
+            $this->command->info("Created directory: {$destinationDir}");
+        }
+
+        // Define the food data with updated image paths
         $foods = [
             [
                 'name' => 'Pepperoni Pizza',
@@ -102,6 +115,27 @@ class FoodSeeder extends Seeder
             ],
         ];
 
+        // Copy each image from public/image to storage/app/public/food_images
+        foreach ($foods as $food) {
+            $imagePath = $food['image']; // e.g., food_images/pepperoni_pizza.jpg
+            $filename = basename($imagePath); // e.g., pepperoni_pizza.jpg
+            $sourceFile = $sourceDir . '/' . $filename;
+            $destinationFile = $destinationDir . '/' . $filename;
+
+            // Check if the source image exists and copy it to the destination
+            if (File::exists($sourceFile)) {
+                if (!File::exists($destinationFile)) {
+                    File::copy($sourceFile, $destinationFile);
+                    $this->command->info("Copied image: {$filename} to storage/app/public/food_images");
+                } else {
+                    $this->command->info("Image already exists: {$filename} in storage/app/public/food_images");
+                }
+            } else {
+                $this->command->warn("Image not found in public/image: {$filename}");
+            }
+        }
+
+        // Insert the food data into the database
         Food::insert($foods);
         $this->command->info('Food database seeded successfully!');
     }
